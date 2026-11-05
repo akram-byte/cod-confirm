@@ -1,0 +1,154 @@
+// COD Confirm — database schema.
+// Money is always stored as integers in DZD.
+// Wilayas and communes live in src/data/algeria.json (not in the database).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum OrderStatus {
+  NEW
+  CONFIRMED
+  NO_ANSWER
+  CALLBACK
+  CANCELLED
+  SHIPPED
+  DELIVERED
+  RETURNED
+}
+
+enum DeliveryType {
+  HOME
+  DESK
+}
+
+enum OrderSource {
+  FORM
+  MANUAL
+}
+
+enum CallOutcome {
+  CONFIRMED
+  NO_ANSWER
+  CALLBACK
+  CANCELLED
+}
+
+// Single row (id = 1): store settings and the owner password.
+model Settings {
+  id               Int      @id @default(1)
+  storeName        String   @default("")
+  passwordHash     String
+  whatsappTemplate String   @default("")
+  updatedAt        DateTime @updatedAt
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String?
+  price       Int // DZD
+  cost        Int         @default(0) // DZD, buying cost per unit
+  active      Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  items       OrderItem[]
+}
+
+model Customer {
+  id              String   @id @default(cuid())
+  phone           String   @unique // normalized: 0XXXXXXXXX
+  name            String
+  blacklisted     Boolean  @default(false)
+  blacklistReason String?
+  note            String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  orders          Order[]
+}
+
+model Order {
+  id             String       @id @default(cuid())
+  number         Int          @unique @default(autoincrement()) // shown to the seller (#1024)
+  customerId     String
+  customer       Customer     @relation(fields: [customerId], references: [id])
+  customerName   String
+  phone          String
+  wilayaCode     Int
+  communeId      Int
+  communeName    String
+  address        String?
+  deliveryType   DeliveryType @default(HOME)
+  deliveryFee    Int          @default(0) // DZD charged to the customer
+  subtotal       Int // DZD, sum of items
+  total          Int // DZD, subtotal + deliveryFee
+  status         OrderStatus  @default(NEW)
+  source         OrderSource  @default(FORM)
+  attempts       Int          @default(0)
+  callbackAt     DateTime?
+  trackingNumber String?
+  returnCost     Int          @default(0) // DZD lost on a returned parcel
+  note           String?
+  confirmedAt    DateTime?
+  cancelledAt    DateTime?
+  shippedAt      DateTime?
+  deliveredAt    DateTime?
+  returnedAt     DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  items          OrderItem[]
+  calls          CallLog[]
+
+  @@index([status, createdAt])
+  @@index([phone])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName String // snapshot at order time
+  quantity    Int      @default(1)
+  unitPrice   Int // DZD snapshot
+  unitCost    Int      @default(0) // DZD snapshot
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model CallLog {
+  id        String      @id @default(cuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  outcome   CallOutcome
+  note      String?
+  createdAt DateTime    @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+model DeliveryFee {
+  wilayaCode Int      @id
+  homeFee    Int // DZD
+  deskFee    Int // DZD
+  active     Boolean  @default(true) // false = we don't deliver there
+  updatedAt  DateTime @updatedAt
+}
+
+model AdSpend {
+  id        String   @id @default(cuid())
+  date      DateTime @unique @db.Date
+  amount    Int // DZD
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

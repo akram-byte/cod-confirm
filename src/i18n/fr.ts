@@ -1,0 +1,67 @@
+import type { Dictionary } from "./ar";
+
+export const fr: Dictionary = {
+  app: {
+    name: "COD Confirm",
+    tagline: "Confirmation des commandes, livraison et bénéfices",
+  },
+  nav: {
+    main: "Menu",
+    dashboard: "Tableau de bord",
+    orders: "Commandes",
+    confirmation: "Confirmation",
+    customers: "Clients",
+    delivery: "Livraison",
+    stats: "Statistiques",
+    settings: "Paramètres",
+    menu: "Menu principal",
+    menuDescription: "Liens vers les pages du tableau de bord",
+    toggleSidebar: "Afficher ou masquer le menu",
+  },
+  header: {
+    theme: "Thème",
+    light: "Clair",
+    dark: "Sombre",
+    system: "Système",
+    language: "Langue",
+    account: "Compte",
+    owner: "Propriétaire",
+    logout: "Se déconnecter",
+  },
+  login: {
+    title: "Connexion",
+    subtitle: "Entrez votre mot de passe pour accéder au tableau de bord",
+    password: "Mot de passe",
+    submit: "Se connecter",
+    submitting: "Connexion…",
+    showPassword: "Afficher le mot de passe",
+    hidePassword: "Masquer le mot de passe",
+    errors: {
+      required: "Entrez le mot de passe",
+      invalid: "Mot de passe incorrect",
+      tooMany: "Trop de tentatives. Réessayez dans quelques minutes.",
+      notSetUp: "La boutique n'est pas encore configurée. Lancez d'abord le seed.",
+      unknown: "Une erreur est survenue. Réessayez.",
+    },
+  },
+  pages: {
+    dashboard: { title: "Tableau de bord", description: "Résumé de l'activité de votre boutique aujourd'hui" },
+    orders: { title: "Commandes", description: "Toutes les commandes, avec recherche et filtres" },
+    confirmation: { title: "Confirmation", description: "Les commandes à appeler, les plus anciennes d'abord" },
+    customers: { title: "Clients", description: "L'historique de chaque client et les clients à risque" },
+    delivery: { title: "Livraison", description: "Commandes expédiées, livrées et retournées" },
+    stats: { title: "Statistiques", description: "Taux de confirmation, de livraison et bénéfice réel" },
+    settings: { title: "Paramètres", description: "Boutique, produits, frais de livraison et mot de passe" },
+  },
+  empty: {
+    title: "Rien ici pour l'instant",
+    soon: "Cette page est en cours de construction et sera bientôt prête.",
+  },
+  cards: {
+    todayOrders: "Commandes du jour",
+    toConfirm: "À confirmer",
+    confirmationRate: "Taux de confirmation",
+    returnRate: "Taux de retour",
+    profit: "Bénéfice",
+  },
+};
