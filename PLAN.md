@@ -13,11 +13,11 @@ Tick boxes as work is finished. Each phase should end working and tested.
 - [x] Dashboard layout: sidebar, header, light/dark mode, mobile drawer
 
 ## Phase 2 — Orders (Day 2)
-- [ ] Public order form `/order/[slug]` (wilaya → commune, delivery type, auto fee, total)
-- [ ] Phone validation, honeypot + rate limit, duplicate detection
-- [ ] Orders table: search, filters (status, date, wilaya, product), status badges
-- [ ] Order detail page + edit + manual order creation
-- [ ] Products management in Settings
+- [x] Public order form `/order/[slug]` (wilaya → commune, delivery type, auto fee, total)
+- [x] Phone validation, honeypot + rate limit, duplicate detection
+- [x] Orders table: search, filters (status, date, wilaya, product), status badges
+- [x] Order detail page + edit + manual order creation
+- [x] Products management in Settings
 
 ## Phase 3 — Confirmation (Day 3)
 - [ ] "To confirm" queue (NEW, NO_ANSWER, due CALLBACK), oldest first

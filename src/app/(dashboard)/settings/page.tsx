@@ -1,7 +1,36 @@
-import { PlaceholderPage, placeholderMetadata } from "@/components/placeholder-page";
+import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { PageIntro } from "@/components/page-intro";
+import { db } from "@/lib/db";
+import { getDictionary } from "@/i18n/server";
+import { ProductsSection } from "./products-section";
 
-export const generateMetadata = () => placeholderMetadata("settings");
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.pages.settings.title };
+}
 
-export default function Page() {
-  return <PlaceholderPage pageKey="settings" />;
+export default async function SettingsPage() {
+  const [t, h, products] = await Promise.all([
+    getDictionary(),
+    headers(),
+    db.product.findMany({
+      orderBy: [{ active: "desc" }, { createdAt: "asc" }],
+      include: { _count: { select: { items: true } } },
+    }),
+  ]);
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+
+  return (
+    <>
+      <PageIntro description={t.pages.settings.description} />
+      <div className="space-y-6">
+        <ProductsSection
+          baseUrl={`${proto}://${host}`}
+          products={products.map(({ _count, ...p }) => ({ ...p, orderCount: _count.items }))}
+        />
+      </div>
+    </>
+  );
 }

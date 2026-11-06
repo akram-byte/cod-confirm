@@ -10,3 +10,8 @@ export function isLocale(value: unknown): value is Locale {
 export function dirOf(locale: Locale): "rtl" | "ltr" {
   return locale === "ar" ? "rtl" : "ltr";
 }
+
+/** Replaces {key} placeholders: fill("Page {page}", { page: 2 }). */
+export function fill(text: string, values: Record<string, string | number>) {
+  return text.replace(/\{(\w+)\}/g, (m, k) => (k in values ? String(values[k]) : m));
+}

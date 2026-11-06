@@ -91,6 +91,7 @@ model Order {
   status         OrderStatus  @default(NEW)
   source         OrderSource  @default(FORM)
   attempts       Int          @default(0)
+  duplicate      Boolean      @default(false) // same phone + same product within 24h
   callbackAt     DateTime?
   trackingNumber String?
   returnCost     Int          @default(0) // DZD lost on a returned parcel
