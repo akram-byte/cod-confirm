@@ -6,6 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BackLink } from "@/components/back-link";
 import { RiskBadge } from "@/components/risk-badge";
+import { KpiStrip } from "@/components/stats/kpi-strip";
 import { StatusBadge } from "@/components/status-badge";
 import { db } from "@/lib/db";
 import { riskOf, statsFor } from "@/lib/customers";
@@ -13,7 +14,6 @@ import { formatDZD } from "@/lib/money";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { toInternational } from "@/lib/phone";
 import { getWilaya, wilayaLabel } from "@/lib/algeria";
-import { cn } from "@/lib/utils";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { fill } from "@/i18n/config";
 import { BlacklistButton, CustomerNote } from "./customer-actions";
@@ -45,9 +45,9 @@ export default async function CustomerPage({ params }: PageProps<"/customers/[id
   const risk = riskOf(customer.blacklisted, stats);
   const cards = [
     { label: t.customers.columns.orders, value: stats.total },
-    { label: t.customers.columns.delivered, value: stats.delivered, cls: "text-emerald-700 dark:text-emerald-400" },
-    { label: t.customers.columns.returned, value: stats.returned, cls: stats.returned ? "text-red-600 dark:text-red-400" : "" },
-    { label: t.customers.columns.cancelled, value: stats.cancelled, cls: stats.cancelled ? "text-amber-700 dark:text-amber-400" : "" },
+    { label: t.customers.columns.delivered, value: stats.delivered, cls: "" },
+    { label: t.customers.columns.returned, value: stats.returned, cls: stats.returned ? "text-negative" : "" },
+    { label: t.customers.columns.cancelled, value: stats.cancelled, cls: "" },
   ];
 
   return (
@@ -57,14 +57,14 @@ export default async function CustomerPage({ params }: PageProps<"/customers/[id
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-xl font-semibold">{customer.name}</h2>
+            <h1 className="text-2xl font-semibold tracking-tight">{customer.name}</h1>
             <RiskBadge risk={risk} labels={t.risk} className="h-6 px-2.5" />
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
             <span dir="ltr">{customer.phone}</span> · {fill(t.customers.since, { date: formatDate(customer.createdAt, locale) })}
           </p>
           {customer.blacklisted && customer.blacklistReason && (
-            <p className="mt-2 text-sm text-red-700 dark:text-red-400">
+            <p className="mt-2 text-sm text-negative">
               {t.customers.reason}: {customer.blacklistReason}
             </p>
           )}
@@ -87,18 +87,12 @@ export default async function CustomerPage({ params }: PageProps<"/customers/[id
         </div>
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-        {cards.map((c) => (
-          <Card key={c.label} size="sm">
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{c.label}</p>
-              <p className={cn("text-2xl font-semibold tabular-nums", c.cls)}>{c.value}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <KpiStrip
+        className="mb-3"
+        items={cards.map((c) => ({ label: c.label, value: String(c.value), tone: c.cls ? ("bad" as const) : undefined }))}
+      />
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid items-start gap-3 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-sm text-muted-foreground">{t.customers.history}</CardTitle>

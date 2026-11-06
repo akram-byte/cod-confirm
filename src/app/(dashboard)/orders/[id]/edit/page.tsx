@@ -26,7 +26,7 @@ export default async function EditOrderPage({ params }: PageProps<"/orders/[id]/
   return (
     <div className="mx-auto max-w-3xl">
       <BackLink href={`/orders/${order.id}`} label={t.common.back} />
-      <h2 className="mb-4 text-lg font-semibold">{fill(t.orders.editor.editTitle, { number: `#${order.number}` })}</h2>
+      <h1 className="mb-5 text-2xl font-semibold tracking-tight">{fill(t.orders.editor.editTitle, { number: `#${order.number}` })}</h1>
       <OrderEditor
         orderId={order.id}
         cancelHref={`/orders/${order.id}`}

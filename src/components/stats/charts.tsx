@@ -13,22 +13,23 @@ const label = (day: string) => `${day.slice(8, 10)}/${day.slice(5, 7)}`;
 export function OrdersChart({ data, className }: { data: ChartDay[]; className?: string }) {
   const { t } = useI18n();
   const config = {
-    orders: { label: t.stats.series.orders, color: "oklch(0.68 0.13 235)" },
-    confirmed: { label: t.stats.series.confirmed, color: "oklch(0.7 0.15 160)" },
-    delivered: { label: t.stats.series.delivered, color: "oklch(0.55 0.15 150)" },
+    // One hue per chart: delivered orders (the money) carry it; the rest stay in greys.
+    orders: { label: t.stats.series.orders, color: "var(--chart-4)" },
+    confirmed: { label: t.stats.series.confirmed, color: "var(--chart-2)" },
+    delivered: { label: t.stats.series.delivered, color: "var(--data)" },
   } satisfies ChartConfig;
   return (
     <div dir="ltr">
       <ChartContainer config={config} className={className ?? "aspect-auto h-64 w-full"}>
         <BarChart data={data} margin={{ left: -20, right: 4, top: 4 }}>
-          <CartesianGrid vertical={false} />
+          <CartesianGrid vertical={false} stroke="var(--grid)" />
           <XAxis dataKey="day" tickFormatter={label} tickLine={false} axisLine={false} minTickGap={16} />
           <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={40} />
           <ChartTooltip content={<ChartTooltipContent labelFormatter={(v) => label(String(v))} />} />
           <ChartLegend content={<ChartLegendContent />} />
-          <Bar dataKey="orders" fill="var(--color-orders)" radius={3} />
-          <Bar dataKey="confirmed" fill="var(--color-confirmed)" radius={3} />
-          <Bar dataKey="delivered" fill="var(--color-delivered)" radius={3} />
+          <Bar dataKey="orders" fill="var(--color-orders)" radius={[2, 2, 0, 0]} isAnimationActive={false} />
+          <Bar dataKey="confirmed" fill="var(--color-confirmed)" radius={[2, 2, 0, 0]} isAnimationActive={false} />
+          <Bar dataKey="delivered" fill="var(--color-delivered)" radius={[2, 2, 0, 0]} isAnimationActive={false} />
         </BarChart>
       </ChartContainer>
     </div>
@@ -38,12 +39,12 @@ export function OrdersChart({ data, className }: { data: ChartDay[]; className?:
 /** Profit per day: green above zero, red below. */
 export function ProfitChart({ data }: { data: ChartDay[] }) {
   const { t, locale } = useI18n();
-  const config = { profit: { label: t.stats.series.profit, color: "oklch(0.6 0.15 155)" } } satisfies ChartConfig;
+  const config = { profit: { label: t.stats.series.profit, color: "var(--chart-1)" } } satisfies ChartConfig;
   return (
     <div dir="ltr">
       <ChartContainer config={config} className="aspect-auto h-64 w-full">
         <BarChart data={data} margin={{ left: 8, right: 4, top: 4 }}>
-          <CartesianGrid vertical={false} />
+          <CartesianGrid vertical={false} stroke="var(--grid)" />
           <XAxis dataKey="day" tickFormatter={label} tickLine={false} axisLine={false} minTickGap={16} />
           <YAxis
             tickLine={false}
@@ -51,7 +52,7 @@ export function ProfitChart({ data }: { data: ChartDay[] }) {
             width={56}
             tickFormatter={(v: number) => (Math.abs(v) >= 1000 ? `${Math.round(v / 1000)}k` : String(v))}
           />
-          <ReferenceLine y={0} stroke="var(--border)" />
+          <ReferenceLine y={0} stroke="var(--foreground)" strokeOpacity={0.35} />
           <ChartTooltip
             content={
               <ChartTooltipContent
@@ -60,9 +61,9 @@ export function ProfitChart({ data }: { data: ChartDay[] }) {
               />
             }
           />
-          <Bar dataKey="profit" radius={3}>
+          <Bar dataKey="profit" radius={[2, 2, 0, 0]} isAnimationActive={false}>
             {data.map((d) => (
-              <Cell key={d.day} fill={d.profit < 0 ? "oklch(0.63 0.2 25)" : "var(--color-profit)"} />
+              <Cell key={d.day} fill={d.profit < 0 ? "var(--negative)" : "var(--color-profit)"} />
             ))}
           </Bar>
         </BarChart>

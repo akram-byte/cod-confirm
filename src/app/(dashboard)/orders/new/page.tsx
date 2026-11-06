@@ -16,7 +16,7 @@ export default async function NewOrderPage() {
   return (
     <div className="mx-auto max-w-3xl">
       <BackLink href="/orders" label={t.common.back} />
-      <h2 className="mb-4 text-lg font-semibold">{t.orders.editor.newTitle}</h2>
+      <h1 className="mb-5 text-2xl font-semibold tracking-tight">{t.orders.editor.newTitle}</h1>
       <OrderEditor
         orderId={null}
         cancelHref="/orders"

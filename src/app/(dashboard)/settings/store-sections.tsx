@@ -146,7 +146,7 @@ export function DeliveryFeesSection({ rows }: { rows: FeeRow[] }) {
                   key={r.wilayaCode}
                   className={cn(
                     "grid grid-cols-[1fr_5rem_5rem_3rem] items-center gap-2 px-3 py-1.5 sm:grid-cols-[1fr_7rem_7rem_4rem]",
-                    dirty && "bg-amber-50 dark:bg-amber-500/10",
+                    dirty && "bg-[var(--pill-warning-bg)]",
                     !v.active && "text-muted-foreground",
                   )}
                 >

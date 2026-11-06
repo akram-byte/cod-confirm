@@ -18,8 +18,8 @@ export function RiskBadge({
       className={cn(
         "inline-flex h-5 shrink-0 items-center gap-1 rounded-full px-2 text-xs font-medium whitespace-nowrap",
         risk === "blacklisted"
-          ? "bg-red-600 text-white dark:bg-red-500/80"
-          : "bg-amber-100 text-amber-900 dark:bg-amber-500/15 dark:text-amber-300",
+          ? "bg-[var(--pill-negative-bg)] text-[var(--pill-negative-ink)]"
+          : "bg-[var(--pill-warning-bg)] text-[var(--pill-warning-ink)]",
         className,
       )}
     >

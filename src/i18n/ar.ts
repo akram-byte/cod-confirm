@@ -458,6 +458,28 @@ export const ar = {
     notFoundTitle: "الصفحة غير موجودة",
     notFoundText: "ربما تم حذف هذا العنصر أو أن الرابط غير صحيح.",
   },
+  home: {
+    findingWaiting: "{count} طلبية تنتظر الاتصال",
+    findingToday: "{count} وصلت اليوم",
+    findingClear: "لا أحد ينتظر الاتصال الآن.",
+    startCalling: "ابدأ الاتصال",
+    outcomesTitle: "أين انتهت طلبيات آخر 30 يوماً",
+    outcomesTotal: "{count} طلبية",
+    outcomesEmpty: "لم تصل أي طلبية في آخر 30 يوماً.",
+    parts: {
+      delivered: "سُلّمت ودُفعت",
+      onTheWay: "مؤكدة أو في الطريق",
+      waiting: "تنتظر الاتصال",
+      cancelled: "أُلغيت",
+      returned: "رجعت",
+    },
+    share: "النسبة",
+    count: "العدد",
+    deliveredMoney: "قيمة المُسلّمة",
+    nextCalls: "الاتصالات التالية",
+    viewAll: "عرض الكل",
+    waiting: "تنتظر منذ {time}",
+  },
 } as const;
 
 type Widen<T> = { [K in keyof T]: T[K] extends string ? string : Widen<T[K]> };

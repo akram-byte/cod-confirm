@@ -15,7 +15,7 @@ export async function PlaceholderPage({ pageKey }: { pageKey: NavKey }) {
   const icon = NAV.find((n) => n.key === pageKey)!.icon;
   return (
     <>
-      <PageIntro description={t.pages[pageKey].description} />
+      <PageIntro title={t.pages[pageKey].title} description={t.pages[pageKey].description} />
       <EmptyState icon={icon} title={t.empty.title} description={t.empty.soon} />
     </>
   );

@@ -101,7 +101,7 @@ export default async function CustomersPage({ searchParams }: PageProps<"/custom
 
   return (
     <>
-      <PageIntro description={t.pages.customers.description} />
+      <PageIntro title={t.pages.customers.title} description={t.pages.customers.description} />
 
       <div className="mb-4 space-y-3">
         <form action="/customers" className="relative">
@@ -116,7 +116,7 @@ export default async function CustomersPage({ searchParams }: PageProps<"/custom
               href={href({ filter: tab.key, page: "" })}
               className={cn(
                 "rounded-full border px-3 py-1 text-sm",
-                filter === tab.key ? "border-primary bg-primary text-primary-foreground" : "hover:bg-muted",
+                filter === tab.key ? "border-transparent bg-secondary font-medium text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground",
               )}
             >
               {tab.label}
@@ -146,7 +146,13 @@ export default async function CustomersPage({ searchParams }: PageProps<"/custom
                   <div className="mt-1 flex items-center justify-between gap-2 text-sm text-muted-foreground">
                     <span dir="ltr">{c.phone}</span>
                     <span className="tabular-nums">
-                      {c.stats.total} · ✓{c.stats.delivered} · ↩{c.stats.returned} · ✕{c.stats.cancelled}
+                      {c.stats.total} {t.customers.columns.orders}
+                      {c.stats.returned > 0 && (
+                        <span className="text-negative">
+                          {" "}
+                          · {c.stats.returned} {t.customers.columns.returned}
+                        </span>
+                      )}
                     </span>
                   </div>
                 </Link>
@@ -182,10 +188,10 @@ export default async function CustomersPage({ searchParams }: PageProps<"/custom
                     </TableCell>
                     <TableCell className="text-center tabular-nums">{c.stats.total}</TableCell>
                     <TableCell className="text-center tabular-nums">{c.stats.delivered}</TableCell>
-                    <TableCell className={cn("text-center tabular-nums", c.stats.returned > 0 && "font-semibold text-red-600 dark:text-red-400")}>
+                    <TableCell className={cn("text-center tabular-nums", c.stats.returned > 0 && "font-medium text-negative")}>
                       {c.stats.returned}
                     </TableCell>
-                    <TableCell className={cn("text-center tabular-nums", c.stats.cancelled > 0 && "text-amber-700 dark:text-amber-400")}>
+                    <TableCell className={cn("text-center tabular-nums", c.stats.cancelled === 0 && "text-muted-foreground")}>
                       {c.stats.cancelled}
                     </TableCell>
                     <TableCell className="text-muted-foreground tabular-nums">{c.lastOrder ? formatDate(c.lastOrder, locale) : "—"}</TableCell>

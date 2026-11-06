@@ -49,7 +49,7 @@ export function PublicOrderForm({
   if (result?.ok) {
     return (
       <div className="flex flex-col items-center py-6 text-center">
-        <CircleCheck className="mb-3 size-14 text-emerald-600" />
+        <CircleCheck className="mb-3 size-14 text-positive" />
         <h2 className="text-xl font-semibold">{t.publicOrder.successTitle}</h2>
         <p className="mt-2 text-muted-foreground">{fill(t.publicOrder.successText, { number: `#${result.number}` })}</p>
         <Button

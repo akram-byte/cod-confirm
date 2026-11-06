@@ -40,3 +40,13 @@ export function formatPercent(value: number | null, locale: Locale) {
   if (value === null) return "—";
   return new Intl.NumberFormat(intlLocale(locale), { style: "percent", maximumFractionDigits: 1 }).format(value);
 }
+
+/** "3 h", "2 j" style elapsed time, in the dashboard language. */
+export function formatAgo(date: Date, locale: Locale, now = new Date()) {
+  const min = Math.max(0, Math.round((now.getTime() - date.getTime()) / 60000));
+  const fmt = (n: number, unit: "minute" | "hour" | "day") =>
+    new Intl.NumberFormat(intlLocale(locale), { style: "unit", unit, unitDisplay: "narrow" }).format(n);
+  if (min < 60) return fmt(min, "minute");
+  if (min < 48 * 60) return fmt(Math.floor(min / 60), "hour");
+  return fmt(Math.floor(min / 1440), "day");
+}

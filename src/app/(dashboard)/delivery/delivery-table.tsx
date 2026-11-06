@@ -60,10 +60,8 @@ export function DeliveryTable({ tab, rows, total }: { tab: Tab; rows: DeliveryRo
     tab === "DELIVERED" || tab === "RETURNED"
       ? ""
       : m === "RETURNED"
-        ? "border-destructive/40 text-destructive hover:bg-destructive/10"
-        : m === "DELIVERED"
-          ? "bg-emerald-600 text-white hover:bg-emerald-700 border-transparent"
-          : "bg-primary text-primary-foreground hover:bg-primary/90 border-transparent";
+        ? "text-negative hover:bg-[var(--pill-negative-bg)]"
+        : "bg-primary text-primary-foreground hover:bg-primary/85 border-transparent";
 
   function toggle(id: string) {
     setSelected((s) => {
@@ -97,7 +95,7 @@ export function DeliveryTable({ tab, rows, total }: { tab: Tab; rows: DeliveryRo
   return (
     <>
       {/* Toolbar */}
-      <div className="sticky top-14 z-[5] -mx-1 mb-3 flex flex-wrap items-center gap-2 rounded-lg bg-background/90 px-1 py-2 backdrop-blur">
+      <div className="sticky top-14 z-[5] -mx-1 mb-3 flex flex-wrap items-center gap-2 rounded-lg bg-background px-1 py-2">
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
@@ -225,7 +223,7 @@ export function DeliveryTable({ tab, rows, total }: { tab: Tab; rows: DeliveryRo
                 <TableCell>
                   <TrackingField id={r.id} value={r.tracking} editable={editableTracking} />
                 </TableCell>
-                {tab === "RETURNED" && <TableCell className="text-end text-red-600 tabular-nums dark:text-red-400">{formatDZD(r.returnCost, locale)}</TableCell>}
+                {tab === "RETURNED" && <TableCell className="text-end text-negative tabular-nums">{formatDZD(r.returnCost, locale)}</TableCell>}
                 <TableCell>
                   <div className="flex gap-1">
                     {MOVES[tab].map((m) => {

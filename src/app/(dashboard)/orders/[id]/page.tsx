@@ -57,12 +57,12 @@ export default async function OrderPage({ params }: PageProps<"/orders/[id]">) {
 
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="text-xl font-semibold">{fill(d.title, { number: `#${order.number}` })}</h2>
+          <h1 className="text-2xl font-semibold tracking-tight">{fill(d.title, { number: `#${order.number}` })}</h1>
           <StatusBadge status={order.status} label={t.status[order.status]} />
           {order.duplicate && (
             <span
               title={t.orders.duplicateHint}
-              className="inline-flex h-6 items-center gap-1 rounded-full bg-orange-100 px-2.5 text-xs font-medium text-orange-800 dark:bg-orange-500/15 dark:text-orange-300"
+              className="inline-flex h-6 items-center gap-1 rounded-full bg-[var(--pill-warning-bg)] px-2.5 text-xs font-medium text-[var(--pill-warning-ink)]"
             >
               <Copy className="size-3" />
               {t.orders.duplicate}

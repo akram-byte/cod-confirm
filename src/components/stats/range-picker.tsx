@@ -26,7 +26,7 @@ export function RangePicker({ from, to, preset }: { from: string; to: string; pr
             onClick={() => router.replace(`${pathname}?range=${p}`)}
             className={cn(
               "rounded-md px-3 py-1 text-sm font-medium",
-              preset === p ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground",
+              preset === p ? "bg-card text-foreground ring-1 ring-border" : "text-muted-foreground hover:text-foreground",
             )}
           >
             {t.stats.ranges[p]}

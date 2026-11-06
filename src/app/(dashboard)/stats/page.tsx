@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { CircleCheck, CircleDollarSign, PhoneCall, ShoppingBag, Undo2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { KpiCard } from "@/components/stats/kpi-card";
+import { KpiStrip } from "@/components/stats/kpi-strip";
+import { PageIntro } from "@/components/page-intro";
 import { OrdersChart, ProfitChart } from "@/components/stats/charts";
 import { RangePicker } from "@/components/stats/range-picker";
 import { getStats, parseRange, todayKey } from "@/lib/stats";
@@ -22,7 +21,13 @@ export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
   const [t, locale, s] = await Promise.all([getDictionary(), getLocale(), getStats(range)]);
   const money = (n: number) => formatDZD(n, locale);
   const pct = (n: number | null) => formatPercent(n, locale);
-  const chartDays = s.days.map(({ day, orders, confirmed, delivered, profit }) => ({ day, orders, confirmed, delivered, profit }));
+  const chartDays = s.days.map(({ day, orders, confirmed, delivered, profit }) => ({
+    day,
+    orders,
+    confirmed,
+    delivered,
+    profit,
+  }));
 
   const breakdown = [
     { label: t.stats.sales, value: s.sales, sign: 1 },
@@ -34,92 +39,86 @@ export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
 
   return (
     <>
-      <div className="mb-6 space-y-2">
+      <PageIntro title={t.pages.stats.title} description={t.stats.basis} />
+      <div className="mb-4">
         <RangePicker key={`${range.from}-${range.to}`} from={range.from} to={range.to} preset={range.preset} />
-        <p className="text-xs text-muted-foreground">{t.stats.basis}</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-5">
-        <KpiCard label={t.stats.orders} value={String(s.orders)} hint={fill(t.stats.pending, { count: s.pending })} icon={ShoppingBag} />
-        <KpiCard label={t.stats.confirmationRate} value={pct(s.confirmationRate)} hint={t.stats.confirmationHint} icon={PhoneCall} />
-        <KpiCard
-          label={t.stats.deliveryRate}
-          value={pct(s.deliveryRate)}
-          hint={fill(t.stats.onTheRoad, { count: s.shipped })}
-          icon={CircleCheck}
-        />
-        <KpiCard
-          label={t.stats.returnRate}
-          value={pct(s.returnRate)}
-          hint={t.stats.returnHint}
-          icon={Undo2}
-          tone={s.returnRate !== null && s.returnRate > 0.25 ? "bad" : undefined}
-        />
-        <KpiCard
-          label={t.stats.profit}
-          value={money(s.profit)}
-          icon={CircleDollarSign}
-          tone={s.profit < 0 ? "bad" : s.profit > 0 ? "good" : undefined}
-          className="col-span-2 lg:col-span-1"
-        />
-      </div>
+      <KpiStrip
+        items={[
+          { label: t.stats.orders, value: String(s.orders), hint: fill(t.stats.pending, { count: s.pending }) },
+          { label: t.stats.confirmationRate, value: pct(s.confirmationRate), hint: t.stats.confirmationHint },
+          {
+            label: t.stats.deliveryRate,
+            value: pct(s.deliveryRate),
+            hint: fill(t.stats.onTheRoad, { count: s.shipped }),
+          },
+          {
+            label: t.stats.returnRate,
+            value: pct(s.returnRate),
+            hint: t.stats.returnHint,
+            tone: s.returnRate !== null && s.returnRate > 0.25 ? "bad" : undefined,
+          },
+          { label: t.stats.profit, value: money(s.profit), tone: s.profit < 0 ? "bad" : undefined, lead: true },
+        ]}
+      />
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-sm text-muted-foreground">{t.stats.ordersChart}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {s.orders === 0 ? <p className="py-16 text-center text-sm text-muted-foreground">{t.stats.noData}</p> : <OrdersChart data={chartDays} />}
-          </CardContent>
-        </Card>
+      {/* Two columns that each stack their cards, so both columns end level:
+          left = the charts (2/3), right = the money (1/3). */}
+      <div className="@container mt-3">
+        <div className="grid items-start gap-3 @4xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <div className="grid gap-3">
+            <section className="rounded-xl bg-card p-5 ring-1 ring-border">
+              <h2 className="mb-3 text-base font-semibold">{t.stats.ordersChart}</h2>
+              {s.orders === 0 ? (
+                <p className="rounded-md border border-dashed px-3 py-2.5 text-sm text-muted-foreground">
+                  {t.stats.noData}
+                </p>
+              ) : (
+                <OrdersChart data={chartDays} />
+              )}
+            </section>
+            <section className="rounded-xl bg-card p-5 ring-1 ring-border">
+              <h2 className="mb-3 text-base font-semibold">{t.stats.profitChart}</h2>
+              {s.orders === 0 && s.adSpend === 0 ? (
+                <p className="rounded-md border border-dashed px-3 py-2.5 text-sm text-muted-foreground">
+                  {t.stats.noData}
+                </p>
+              ) : (
+                <ProfitChart data={chartDays} />
+              )}
+            </section>
+          </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm text-muted-foreground">{t.stats.profitTitle}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <dl className="space-y-2 text-sm">
-              {breakdown.map((b) => (
-                <div key={b.label} className="flex justify-between gap-2">
-                  <dt className="text-muted-foreground">{b.label}</dt>
-                  <dd className={cn("tabular-nums", b.sign < 0 && b.value > 0 && "text-red-600 dark:text-red-400")}>
-                    {b.sign < 0 && b.value > 0 ? "− " : ""}
-                    {money(b.value)}
-                  </dd>
+          <div className="grid gap-3">
+            <section className="rounded-xl bg-card p-5 ring-1 ring-border">
+              <h2 className="mb-3 text-base font-semibold">{t.stats.profitTitle}</h2>
+              <dl className="text-sm">
+                {breakdown.map((b) => (
+                  <div key={b.label} className="flex justify-between gap-2 border-b border-rule py-2">
+                    <dt className="text-muted-foreground">{b.label}</dt>
+                    <dd className="tabular-nums">
+                      {b.sign < 0 && b.value > 0 ? "− " : ""}
+                      {money(b.value)}
+                    </dd>
+                  </div>
+                ))}
+                <div className="flex justify-between gap-2 pt-3 text-base font-bold">
+                  <dt>{t.stats.profit}</dt>
+                  <dd className={cn("tabular-nums", s.profit < 0 && "text-negative")}>{money(s.profit)}</dd>
                 </div>
-              ))}
-              <div className="flex justify-between gap-2 border-t pt-2 text-base font-semibold">
-                <dt>{t.stats.profit}</dt>
-                <dd className={cn("tabular-nums", s.profit < 0 ? "text-red-600 dark:text-red-400" : "text-emerald-700 dark:text-emerald-400")}>
-                  {money(s.profit)}
-                </dd>
-              </div>
-            </dl>
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-sm text-muted-foreground">{t.stats.profitChart}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {s.orders === 0 && s.adSpend === 0 ? (
-              <p className="py-16 text-center text-sm text-muted-foreground">{t.stats.noData}</p>
-            ) : (
-              <ProfitChart data={chartDays} />
-            )}
-          </CardContent>
-        </Card>
-
-        <AdSpendCard
-          key={`${range.from}-${range.to}`}
-          today={todayKey()}
-          entries={s.days
-            .filter((d) => d.adSpend > 0)
-            .map((d) => ({ day: d.day, amount: d.adSpend }))
-            .reverse()}
-        />
+              </dl>
+            </section>
+            <AdSpendCard
+              key={`${range.from}-${range.to}`}
+              today={todayKey()}
+              entries={s.days
+                .filter((d) => d.adSpend > 0)
+                .map((d) => ({ day: d.day, amount: d.adSpend }))
+                .reverse()}
+            />
+          </div>
+        </div>
       </div>
     </>
   );

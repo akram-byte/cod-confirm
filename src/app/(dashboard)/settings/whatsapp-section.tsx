@@ -63,7 +63,7 @@ export function WhatsappSection({ template, sample }: { template: string; sample
             </button>
           ))}
         </div>
-        <div className="rounded-lg bg-emerald-50 p-3 text-sm whitespace-pre-wrap dark:bg-emerald-500/10">
+        <div className="rounded-lg bg-muted p-3 text-sm whitespace-pre-wrap">
           <p className="mb-1 text-xs font-medium text-muted-foreground">{t.whatsappSettings.preview}</p>
           {preview}
         </div>

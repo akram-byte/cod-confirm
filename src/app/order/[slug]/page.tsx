@@ -40,13 +40,13 @@ export default async function PublicOrderPage({ params }: PageProps<"/order/[slu
           <p className="truncate font-semibold">{settings?.storeName}</p>
           <LanguageToggle />
         </div>
-        <div className="rounded-xl border bg-card shadow-sm">
+        <div className="rounded-xl border bg-card">
           <div className="border-b p-5">
             <h1 className="text-xl font-semibold">{product.name}</h1>
             {product.description && <p className="mt-1 text-sm text-muted-foreground">{product.description}</p>}
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <span className="text-2xl font-bold tabular-nums">{formatDZD(product.price, locale)}</span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--pill-positive-bg)] px-2.5 py-1 text-xs font-medium text-[var(--pill-positive-ink)]">
                 <Banknote className="size-3.5" />
                 {t.publicOrder.payOnDelivery}
               </span>

@@ -99,7 +99,7 @@ export default async function OrdersPage({ searchParams }: PageProps<"/orders">)
 
   return (
     <>
-      <PageIntro description={t.pages.orders.description}>
+      <PageIntro title={t.pages.orders.title} description={t.pages.orders.description}>
         <Link href="/orders/new" className={buttonVariants()}>
           <Plus className="size-4" />
           {t.orders.newOrder}
@@ -221,7 +221,7 @@ function DuplicateTag({ label, hint }: { label: string; hint: string }) {
   return (
     <span
       title={hint}
-      className="inline-flex h-5 items-center gap-1 rounded-full bg-orange-100 px-2 text-xs font-medium text-orange-800 dark:bg-orange-500/15 dark:text-orange-300"
+      className="inline-flex h-5 items-center gap-1 rounded-full bg-[var(--pill-warning-bg)] px-2 text-xs font-medium text-[var(--pill-warning-ink)]"
     >
       <Copy className="size-3" />
       {label}

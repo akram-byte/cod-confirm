@@ -108,10 +108,11 @@ export function ConfirmationWorkspace({
 }
 
 const OUTCOME_STYLE: Record<CallOutcome, string> = {
-  CONFIRMED: "bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500",
-  NO_ANSWER: "bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-400",
-  CALLBACK: "bg-violet-600 text-white hover:bg-violet-700 dark:bg-violet-600 dark:hover:bg-violet-500",
-  CANCELLED: "border border-destructive/40 bg-transparent text-destructive hover:bg-destructive/10",
+  // Confirming is the screen's one primary action; the other outcomes are quieter.
+  CONFIRMED: "bg-primary text-primary-foreground hover:bg-primary/85",
+  NO_ANSWER: "border border-input bg-card text-foreground hover:bg-muted",
+  CALLBACK: "border border-input bg-card text-foreground hover:bg-muted",
+  CANCELLED: "border border-input bg-card text-negative hover:bg-[var(--pill-negative-bg)]",
 };
 const OUTCOME_ICON = { CONFIRMED: Check, NO_ANSWER: PhoneMissed, CALLBACK: CalendarClock, CANCELLED: X };
 const OUTCOMES: CallOutcome[] = ["CONFIRMED", "NO_ANSWER", "CALLBACK", "CANCELLED"];
@@ -184,7 +185,7 @@ function CallCard({ order, nextId }: { order: CurrentOrder; nextId: string | nul
             {order.duplicate && (
               <span
                 title={t.orders.duplicateHint}
-                className="inline-flex h-6 items-center gap-1 rounded-full bg-orange-100 px-2.5 text-xs font-medium text-orange-800 dark:bg-orange-500/15 dark:text-orange-300"
+                className="inline-flex h-6 items-center gap-1 rounded-full bg-[var(--pill-warning-bg)] px-2.5 text-xs font-medium text-[var(--pill-warning-ink)]"
               >
                 <Copy className="size-3" />
                 {t.orders.duplicate}
@@ -216,7 +217,7 @@ function CallCard({ order, nextId }: { order: CurrentOrder; nextId: string | nul
             href={order.whatsappHref}
             target="_blank"
             rel="noreferrer"
-            className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-11 text-base text-emerald-700 dark:text-emerald-400")}
+            className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-11 text-base")}
           >
             <MessageCircle className="size-4" />
             {t.confirm.whatsapp}

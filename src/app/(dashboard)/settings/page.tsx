@@ -32,7 +32,7 @@ export default async function SettingsPage() {
 
   return (
     <>
-      <PageIntro description={t.pages.settings.description} />
+      <PageIntro title={t.pages.settings.title} description={t.pages.settings.description} />
       <div className="space-y-6">
         <StoreNameSection name={settings?.storeName ?? ""} />
         <ProductsSection

@@ -67,7 +67,7 @@ export default async function DeliveryPage({ searchParams }: PageProps<"/deliver
 
   return (
     <>
-      <PageIntro description={t.pages.delivery.description} />
+      <PageIntro title={t.pages.delivery.title} description={t.pages.delivery.description} />
 
       <nav className="mb-4 flex gap-1 overflow-x-auto rounded-lg bg-muted p-1" aria-label={t.pages.delivery.title}>
         {DELIVERY_TABS.map((s) => (
@@ -77,7 +77,7 @@ export default async function DeliveryPage({ searchParams }: PageProps<"/deliver
             replace
             className={cn(
               "flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap",
-              s === tab ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground",
+              s === tab ? "bg-card text-foreground ring-1 ring-border" : "text-muted-foreground hover:text-foreground",
             )}
           >
             {t.delivery.tabs[s]}

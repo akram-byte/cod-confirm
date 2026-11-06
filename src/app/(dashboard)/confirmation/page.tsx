@@ -70,7 +70,7 @@ export default async function ConfirmationPage({ searchParams }: PageProps<"/con
   if (queue.length === 0) {
     return (
       <>
-        <PageIntro description={t.pages.confirmation.description} />
+        <PageIntro title={t.pages.confirmation.title} description={t.pages.confirmation.description} />
         <EmptyState icon={PartyPopper} title={t.confirm.emptyTitle} description={t.confirm.emptyText} />
         {upcomingList}
       </>
@@ -130,7 +130,7 @@ export default async function ConfirmationPage({ searchParams }: PageProps<"/con
 
   return (
     <>
-      <PageIntro description={fill(t.confirm.queueCount, { count: queue.length })} />
+      <PageIntro title={t.pages.confirmation.title} description={fill(t.confirm.queueCount, { count: queue.length })} />
       <ConfirmationWorkspace current={current} queue={queue.map((o) => toRow(o, locale, risks.get(o.customerId)))} nextId={nextId} />
       {upcomingList}
     </>
