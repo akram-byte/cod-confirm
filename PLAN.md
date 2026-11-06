@@ -39,11 +39,13 @@ Tick boxes as work is finished. Each phase should end working and tested.
 - [x] Charts + date range filter
 
 ## Phase 6 — Polish & ship (Days 6–7)
-- [ ] Empty states, loading states, error messages, toasts
-- [ ] Mobile check of every page, RTL check
-- [ ] Settings: store name, delivery fees editor, password change
+- [x] Empty states, loading states, error messages, toasts
+- [x] Mobile check of every page, RTL check
+- [x] Settings: store name, delivery fees editor
+- [ ] Settings: password change (built; wrong-password and mismatch tested, a real change still to test with the owner password)
 - [ ] Deploy demo (Vercel + Neon), demo data
-- [ ] README (setup for a new client), screenshots, short demo video
+- [x] README (setup for a new client, deploy, reset-password script)
+- [ ] Screenshots, short demo video
 
 ## Later (v2 ideas)
 - Yalidine / ZR Express API, WhatsApp Business API, stock management.

@@ -22,7 +22,7 @@ import {
 import { Field } from "@/components/field";
 import { LocationFields, feeFor, type Fees, type LocationValue } from "@/components/orders/location-fields";
 import { QuantityInput } from "@/components/orders/quantity-input";
-import { translateErrors } from "@/components/orders/error-text";
+import { translateErrors, withoutError } from "@/components/orders/error-text";
 import { useI18n } from "@/i18n/client";
 import { fill } from "@/i18n/config";
 import { formatDZD } from "@/lib/money";
@@ -70,12 +70,16 @@ export function OrderEditor({
   const [note, setNote] = useState(initial.note);
 
   const product = products.find((p) => p.id === productId);
-  const unitPrice = productId === initial.productId && initial.unitPrice !== undefined ? initial.unitPrice : (product?.price ?? 0);
+  const unitPrice =
+    productId === initial.productId && initial.unitPrice !== undefined ? initial.unitPrice : (product?.price ?? 0);
   const subtotal = unitPrice * quantity;
   const feeNumber = Number(fee) || 0;
   const errors = state && !state.ok ? translateErrors(t, state.errors) : {};
 
+  const clear = (...fields: string[]) => setState((st) => withoutError(st, fields));
+
   function updateLocation(patch: Partial<LocationValue>) {
+    clear(...Object.keys(patch));
     const next = { ...location, ...patch };
     setLocation(next);
     // New wilaya or delivery type → refill the fee from the fee table.
@@ -132,7 +136,10 @@ export function OrderEditor({
               id="productId"
               className="w-full"
               value={productId}
-              onChange={(e) => setProductId(e.target.value)}
+              onChange={(e) => {
+                setProductId(e.target.value);
+                clear("productId");
+              }}
               aria-invalid={!!errors.productId}
             >
               <NativeSelectOption value="">—</NativeSelectOption>
@@ -153,7 +160,10 @@ export function OrderEditor({
             <Input
               id="customerName"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                clear("customerName");
+              }}
               maxLength={80}
               aria-invalid={!!errors.customerName}
             />
@@ -166,7 +176,10 @@ export function OrderEditor({
               dir="ltr"
               className="rtl:text-right"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => {
+                setPhone(e.target.value);
+                clear("phone");
+              }}
               placeholder={t.orderFields.phonePlaceholder}
               maxLength={20}
               aria-invalid={!!errors.phone}
@@ -177,14 +190,22 @@ export function OrderEditor({
         <LocationFields wilayas={wilayas} fees={fees} value={location} onChange={updateLocation} errors={errors} />
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field id="deliveryFee" label={t.orderFields.deliveryFee} error={errors.deliveryFee} hint={t.orders.editor.feeHint}>
+          <Field
+            id="deliveryFee"
+            label={t.orderFields.deliveryFee}
+            error={errors.deliveryFee}
+            hint={t.orders.editor.feeHint}
+          >
             <Input
               id="deliveryFee"
               inputMode="numeric"
               dir="ltr"
               className="rtl:text-right"
               value={fee}
-              onChange={(e) => setFee(e.target.value.replace(/\D/g, ""))}
+              onChange={(e) => {
+                setFee(e.target.value.replace(/\D/g, ""));
+                clear("deliveryFee");
+              }}
               aria-invalid={!!errors.deliveryFee}
             />
           </Field>
@@ -225,7 +246,9 @@ export function OrderEditor({
                 setState(null);
                 submit(true);
               }}
-            >{t.orders.createAnyway}</AlertDialogAction>
+            >
+              {t.orders.createAnyway}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

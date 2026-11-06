@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Field } from "@/components/field";
 import { LocationFields, feeFor, type Fees, type LocationValue } from "@/components/orders/location-fields";
 import { QuantityInput } from "@/components/orders/quantity-input";
-import { translateErrors } from "@/components/orders/error-text";
+import { translateErrors, withoutError } from "@/components/orders/error-text";
 import { useI18n } from "@/i18n/client";
 import { fill } from "@/i18n/config";
 import { formatDZD } from "@/lib/money";
@@ -33,6 +33,7 @@ export function PublicOrderForm({
   const [quantity, setQuantity] = useState(1);
   const [location, setLocation] = useState<LocationValue>(EMPTY_LOCATION);
 
+  const clear = (...fields: string[]) => setResult((r) => withoutError(r, fields));
   const fee = feeFor(fees, location);
   const subtotal = product.price * quantity;
   const errors = result && !result.ok ? translateErrors(t, result.errors) : {};
@@ -100,7 +101,10 @@ export function PublicOrderForm({
           id="customerName"
           className="h-11 text-base"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setName(e.target.value);
+            clear("customerName");
+          }}
           autoComplete="name"
           maxLength={80}
           aria-invalid={!!errors.customerName}
@@ -115,7 +119,10 @@ export function PublicOrderForm({
           dir="ltr"
           className="h-11 text-base rtl:text-right"
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          onChange={(e) => {
+            setPhone(e.target.value);
+            clear("phone");
+          }}
           placeholder={t.orderFields.phonePlaceholder}
           autoComplete="tel"
           maxLength={20}
@@ -127,7 +134,10 @@ export function PublicOrderForm({
         wilayas={wilayas}
         fees={fees}
         value={location}
-        onChange={(p) => setLocation((l) => ({ ...l, ...p }))}
+        onChange={(p) => {
+          setLocation((l) => ({ ...l, ...p }));
+          clear(...Object.keys(p));
+        }}
         errors={errors}
         large
       />
