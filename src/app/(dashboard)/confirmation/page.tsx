@@ -10,6 +10,7 @@ import { formatDateTime } from "@/lib/format";
 import { getCommune, getWilaya, wilayaLabel } from "@/lib/algeria";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { fill, type Locale } from "@/i18n/config";
+import { risksFor } from "@/lib/customers";
 import { ConfirmationWorkspace, type CurrentOrder, type QueueRow } from "./workspace";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -22,8 +23,9 @@ function wilayaText(code: number, locale: Locale) {
   return w ? wilayaLabel(w, locale) : String(code);
 }
 
-function toRow(o: QueueItem, locale: Locale): QueueRow {
+function toRow(o: QueueItem, locale: Locale, risk: QueueRow["risk"]): QueueRow {
   return {
+    risk,
     id: o.id,
     number: o.number,
     customerName: o.customerName,
@@ -85,6 +87,7 @@ export default async function ConfirmationPage({ searchParams }: PageProps<"/con
     include: { items: true, calls: { orderBy: { createdAt: "desc" }, take: 10 } },
   });
 
+  const risks = await risksFor(queue.map((o) => o.customerId));
   const commune = getCommune(order.wilayaCode, order.communeId);
   const wilaya = wilayaText(order.wilayaCode, locale);
   const productText = order.items.map((i) => (i.quantity > 1 ? `${i.productName} ×${i.quantity}` : i.productName)).join("، ");
@@ -94,6 +97,8 @@ export default async function ConfirmationPage({ searchParams }: PageProps<"/con
 
   const current: CurrentOrder = {
     id: order.id,
+    customerId: order.customerId,
+    risk: risks.get(order.customerId),
     number: order.number,
     status: order.status,
     customerName: order.customerName,
@@ -126,7 +131,7 @@ export default async function ConfirmationPage({ searchParams }: PageProps<"/con
   return (
     <>
       <PageIntro description={fill(t.confirm.queueCount, { count: queue.length })} />
-      <ConfirmationWorkspace current={current} queue={queue.map((o) => toRow(o, locale))} nextId={nextId} />
+      <ConfirmationWorkspace current={current} queue={queue.map((o) => toRow(o, locale, risks.get(o.customerId)))} nextId={nextId} />
       {upcomingList}
     </>
   );

@@ -7,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { EmptyState } from "@/components/empty-state";
 import { PageIntro } from "@/components/page-intro";
 import { StatusBadge } from "@/components/status-badge";
+import { RiskBadge } from "@/components/risk-badge";
+import { risksFor } from "@/lib/customers";
 import { db } from "@/lib/db";
 import { ORDER_STATUSES } from "@/lib/orders";
 import { formatDZD } from "@/lib/money";
@@ -74,6 +76,7 @@ export default async function OrdersPage({ searchParams }: PageProps<"/orders">)
     db.order.count({ where }),
     db.product.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
   ]);
+  const risks = await risksFor(orders.map((o) => o.customerId));
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const filtered = Object.keys(sp).some((k) => k !== "page" && str(sp[k]));
 
@@ -89,6 +92,7 @@ export default async function OrdersPage({ searchParams }: PageProps<"/orders">)
     return {
       ...o,
       wilaya: w ? wilayaLabel(w, locale) : String(o.wilayaCode),
+      risk: risks.get(o.customerId),
       productText: o.items.map((i) => (i.quantity > 1 ? `${i.productName} ×${i.quantity}` : i.productName)).join("، "),
     };
   });
@@ -135,7 +139,10 @@ export default async function OrdersPage({ searchParams }: PageProps<"/orders">)
                     <span className="font-medium tabular-nums">{formatDZD(o.total, locale)}</span>
                   </div>
                   <div className="mt-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                    <span dir="ltr">{o.phone}</span>
+                    <span className="flex items-center gap-2">
+                      <span dir="ltr">{o.phone}</span>
+                      <RiskBadge risk={o.risk} labels={t.risk} />
+                    </span>
                     <span className="flex items-center gap-2">
                       {o.duplicate && <DuplicateTag label={t.orders.duplicate} hint={t.orders.duplicateHint} />}
                       {formatDateTime(o.createdAt, locale)}
@@ -147,7 +154,7 @@ export default async function OrdersPage({ searchParams }: PageProps<"/orders">)
           </ul>
 
           {/* Desktop: table */}
-          <div className="hidden overflow-hidden rounded-xl border bg-card md:block">
+          <div className="hidden overflow-x-auto rounded-xl border bg-card md:block">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -171,8 +178,9 @@ export default async function OrdersPage({ searchParams }: PageProps<"/orders">)
                     <TableCell className="text-muted-foreground tabular-nums">{formatDateTime(o.createdAt, locale)}</TableCell>
                     <TableCell>
                       <div className="font-medium">{o.customerName}</div>
-                      <div className="text-xs text-muted-foreground" dir="ltr">
-                        {o.phone}
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <span dir="ltr">{o.phone}</span>
+                        <RiskBadge risk={o.risk} labels={t.risk} />
                       </div>
                     </TableCell>
                     <TableCell className="max-w-40 truncate">{o.wilaya}</TableCell>

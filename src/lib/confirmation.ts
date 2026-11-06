@@ -11,6 +11,7 @@ const QUEUE_LIMIT = 300;
 const queueSelect = {
   id: true,
   number: true,
+  customerId: true,
   customerName: true,
   phone: true,
   wilayaCode: true,

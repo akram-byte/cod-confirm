@@ -27,10 +27,10 @@ Tick boxes as work is finished. Each phase should end working and tested.
 - [x] Fast keyboard/phone-friendly flow (next order after action)
 
 ## Phase 4 — Customers & delivery (Day 4)
-- [ ] Customer list + profile with full history
-- [ ] Risk badge (returns/cancellations) + manual blacklist, flag on new orders
-- [ ] Delivery page: mark Shipped / Delivered / Returned, tracking number, bulk actions
-- [ ] Excel/CSV export of confirmed orders
+- [x] Customer list + profile with full history
+- [x] Risk badge (returns/cancellations) + manual blacklist, flag on new orders
+- [x] Delivery page: mark Shipped / Delivered / Returned, tracking number, bulk actions
+- [x] Excel/CSV export of confirmed orders
 
 ## Phase 5 — Stats & dashboard home (Day 5)
 - [ ] Summary cards on home

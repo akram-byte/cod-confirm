@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/status-badge";
+import { RiskBadge } from "@/components/risk-badge";
 import { useI18n } from "@/i18n/client";
 import { fill } from "@/i18n/config";
 import { formatDZD } from "@/lib/money";
@@ -17,8 +18,11 @@ import { cn } from "@/lib/utils";
 import type { CallOutcome, OrderStatus } from "@/generated/prisma/enums";
 import { recordCall } from "./actions";
 
+type Risk = "blacklisted" | "risky" | "ok" | undefined;
+
 export type QueueRow = {
   id: string;
+  risk: Risk;
   number: number;
   customerName: string;
   wilaya: string;
@@ -29,6 +33,8 @@ export type QueueRow = {
 
 export type CurrentOrder = {
   id: string;
+  customerId: string;
+  risk: Risk;
   number: number;
   status: OrderStatus;
   customerName: string;
@@ -83,7 +89,10 @@ export function ConfirmationWorkspace({
                   <StatusBadge status={o.status} label={t.status[o.status]} className="h-5 px-2" />
                 </div>
                 <div className="mt-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                  <span className="truncate">{o.wilaya}</span>
+                  <span className="flex min-w-0 items-center gap-1.5">
+                    <span className="truncate">{o.wilaya}</span>
+                    <RiskBadge risk={o.risk} labels={t.risk} />
+                  </span>
                   <span className="shrink-0 tabular-nums">
                     {o.attempts > 0 && `${o.attempts}× · `}
                     {o.time}
@@ -171,6 +180,7 @@ function CallCard({ order, nextId }: { order: CurrentOrder; nextId: string | nul
               <bdi>#{order.number}</bdi> · <bdi>{order.customerName}</bdi>
             </h2>
             <StatusBadge status={order.status} label={t.status[order.status]} />
+            <RiskBadge risk={order.risk} labels={t.risk} className="h-6 px-2.5" />
             {order.duplicate && (
               <span
                 title={t.orders.duplicateHint}

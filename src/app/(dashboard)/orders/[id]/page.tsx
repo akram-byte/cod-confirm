@@ -14,6 +14,8 @@ import { getCommune, getWilaya, wilayaLabel } from "@/lib/algeria";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { fill } from "@/i18n/config";
 import { StatusSelect } from "./status-select";
+import { RiskBadge } from "@/components/risk-badge";
+import { risksFor } from "@/lib/customers";
 
 export async function generateMetadata({ params }: PageProps<"/orders/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -32,6 +34,7 @@ export default async function OrderPage({ params }: PageProps<"/orders/[id]">) {
     }),
   ]);
   if (!order) notFound();
+  const risk = (await risksFor([order.customerId])).get(order.customerId);
 
   const wilaya = getWilaya(order.wilayaCode);
   const commune = getCommune(order.wilayaCode, order.communeId);
@@ -87,7 +90,12 @@ export default async function OrderPage({ params }: PageProps<"/orders/[id]">) {
                 <CardTitle className="text-sm text-muted-foreground">{d.customer}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-1">
-                <p className="font-medium">{order.customerName}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Link href={`/customers/${order.customerId}`} className="font-medium hover:underline">
+                    {order.customerName}
+                  </Link>
+                  <RiskBadge risk={risk} labels={t.risk} />
+                </div>
                 <a href={`tel:${order.phone}`} dir="ltr" className="block text-sm hover:underline rtl:text-right">
                   {order.phone}
                 </a>

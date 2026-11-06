@@ -16,7 +16,7 @@ export default async function DashboardLayout({ children }: LayoutProps<"/">) {
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
       <AppSidebar storeName={settings?.storeName ?? ""} />
-      <SidebarInset>
+      <SidebarInset className="min-w-0">
         <SiteHeader />
         <main className="flex-1 p-4 md:p-6">
           <div className="mx-auto w-full max-w-6xl">{children}</div>
