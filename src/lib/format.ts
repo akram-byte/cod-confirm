@@ -35,3 +35,8 @@ export function startOfDay(ymd: string): Date | null {
   const d = new Date(`${ymd}T00:00:00${TZ_OFFSET}`);
   return isNaN(d.getTime()) ? null : d;
 }
+
+export function formatPercent(value: number | null, locale: Locale) {
+  if (value === null) return "—";
+  return new Intl.NumberFormat(intlLocale(locale), { style: "percent", maximumFractionDigits: 1 }).format(value);
+}

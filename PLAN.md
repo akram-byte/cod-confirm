@@ -33,10 +33,10 @@ Tick boxes as work is finished. Each phase should end working and tested.
 - [x] Excel/CSV export of confirmed orders
 
 ## Phase 5 — Stats & dashboard home (Day 5)
-- [ ] Summary cards on home
-- [ ] Confirmation / delivery / return rates
-- [ ] Profit calculation + daily ad spend entry
-- [ ] Charts + date range filter
+- [x] Summary cards on home
+- [x] Confirmation / delivery / return rates
+- [x] Profit calculation + daily ad spend entry
+- [x] Charts + date range filter
 
 ## Phase 6 — Polish & ship (Days 6–7)
 - [ ] Empty states, loading states, error messages, toasts
