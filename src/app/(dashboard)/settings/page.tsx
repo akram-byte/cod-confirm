@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { PageIntro } from "@/components/page-intro";
 import { db } from "@/lib/db";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getLocale } from "@/i18n/server";
+import { formatDZD } from "@/lib/money";
 import { ProductsSection } from "./products-section";
+import { WhatsappSection } from "./whatsapp-section";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -11,9 +13,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SettingsPage() {
-  const [t, h, products] = await Promise.all([
+  const [t, locale, h, settings, products] = await Promise.all([
     getDictionary(),
+    getLocale(),
     headers(),
+    db.settings.findUnique({ where: { id: 1 }, select: { storeName: true, whatsappTemplate: true } }),
     db.product.findMany({
       orderBy: [{ active: "desc" }, { createdAt: "asc" }],
       include: { _count: { select: { items: true } } },
@@ -29,6 +33,17 @@ export default async function SettingsPage() {
         <ProductsSection
           baseUrl={`${proto}://${host}`}
           products={products.map(({ _count, ...p }) => ({ ...p, orderCount: _count.items }))}
+        />
+        <WhatsappSection
+          template={settings?.whatsappTemplate ?? ""}
+          sample={{
+            name: locale === "ar" ? "محمد بن علي" : "Mohamed Benali",
+            store: settings?.storeName ?? "",
+            order: "#1024",
+            product: products[0]?.name ?? "—",
+            total: formatDZD(products[0] ? products[0].price + 400 : 0, locale),
+            wilaya: locale === "ar" ? "16 - الجزائر" : "16 - Alger",
+          }}
         />
       </div>
     </>

@@ -20,11 +20,11 @@ Tick boxes as work is finished. Each phase should end working and tested.
 - [x] Products management in Settings
 
 ## Phase 3 — Confirmation (Day 3)
-- [ ] "To confirm" queue (NEW, NO_ANSWER, due CALLBACK), oldest first
-- [ ] One-click outcomes, attempt counter, call log with note
-- [ ] Call-back scheduling (date/time picker)
-- [ ] WhatsApp pre-filled link + editable template; `tel:` link
-- [ ] Fast keyboard/phone-friendly flow (next order after action)
+- [x] "To confirm" queue (NEW, NO_ANSWER, due CALLBACK), oldest first
+- [x] One-click outcomes, attempt counter, call log with note
+- [x] Call-back scheduling (date/time picker)
+- [x] WhatsApp pre-filled link + editable template; `tel:` link
+- [x] Fast keyboard/phone-friendly flow (next order after action)
 
 ## Phase 4 — Customers & delivery (Day 4)
 - [ ] Customer list + profile with full history
