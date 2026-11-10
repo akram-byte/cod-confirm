@@ -63,7 +63,7 @@ export function DeliveryTable({ tab, rows, total }: { tab: Tab; rows: DeliveryRo
       ? ""
       : m === "RETURNED"
         ? "text-negative hover:bg-[var(--pill-negative-bg)]"
-        : "bg-primary text-primary-foreground hover:bg-primary/85 border-transparent";
+        : "border-hue-track bg-hue-soft text-hue-ink hover:bg-hue-track hover:text-hue-ink";
 
   function toggle(id: string) {
     setSelected((s) => {

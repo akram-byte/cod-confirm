@@ -89,6 +89,14 @@ You need Node.js 20+ and a free [Neon](https://neon.tech) PostgreSQL database (S
    (no need for `OWNER_PASSWORD` on Vercel).
 4. Run `npm run db:deploy` and `npm run db:seed` once from your computer with the same `.env`.
 5. Deploy. Use a Neon region close to Vercel's (e.g. Frankfurt `eu-central-1`) so pages stay fast.
+6. Check the live site: open `/login`, sign in, then open `/order/montre-classique` (demo product)
+   and place a test order. It should appear in *Confirmation*.
+
+Notes for the demo:
+- Keep `sslmode=verify-full` in both connection strings (as in `.env.example`).
+- The spam rate limit is in memory, so on Vercel (serverless) it is only best-effort.
+  Fine for a demo; use the VPS setup below for real clients.
+- Delete the demo products/orders in the app before handing a copy to a client.
 
 > Vercel's free Hobby plan is for **non-commercial** use. For paying clients use a Vercel Pro plan
 > or a small VPS (below).

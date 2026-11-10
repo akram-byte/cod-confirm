@@ -41,7 +41,7 @@ export function KpiStrip({ items, className }: { items: Kpi[]; className?: strin
             <p
               className={cn(
                 "mt-1 whitespace-nowrap tabular-nums",
-                k.lead ? "text-[30px] leading-9 font-bold" : "text-2xl leading-9 font-medium",
+                k.lead ? "text-[30px] leading-9 font-bold" : "text-2xl leading-9 font-semibold",
                 k.tone === "good" && "text-positive",
                 k.tone === "bad" && "text-negative",
               )}

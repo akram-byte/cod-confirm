@@ -42,6 +42,10 @@
   --color-rule: var(--rule);
   --color-frame: var(--frame);
   --color-data: var(--data);
+  --color-hue-soft: var(--hue-soft);
+  --color-hue-track: var(--hue-track);
+  --color-hue-mid: var(--hue-mid);
+  --color-hue-ink: var(--hue-ink);
   --color-positive: var(--positive);
   --color-negative: var(--negative);
   --color-grid: var(--grid);
@@ -55,55 +59,61 @@
 }
 
 :root {
-  /* Framed sheet (macOS-like): a soft grey frame (sidebar + top bar) holds a white
-     sheet with a hairline edge. Depth comes from one tone step, never a shadow.
-     The one hue (--data, a system blue) marks money, delivered orders and the active tab. */
-  --frame: #f2f2f4;
-  --background: #ffffff;
-  --foreground: #1d1d1f;
+  /* Accent ladder on an open plane. One hue, Algeria's green: the colour of a confirmed
+     order and of cash in hand. At full strength it sits only on small marks (the primary
+     button, the delivered series, the active nav icon); its pale tints do the area work
+     (active nav row, tracks, badges). The ground leans one step toward the palest tint,
+     so page and tints read as one family. Cards are white with a 1px edge, never a shadow. */
+  --frame: #f5f8f6;
+  --background: #f5f8f6;
+  --foreground: #0f1a15;
   --card: #ffffff;
-  --card-foreground: #1d1d1f;
+  --card-foreground: #0f1a15;
   --popover: #ffffff;
-  --popover-foreground: #1d1d1f;
-  --primary: #1d1d1f;
+  --popover-foreground: #0f1a15;
+  --primary: #0b7a53;
   --primary-foreground: #ffffff;
-  --secondary: #ededf0;
-  --secondary-foreground: #1d1d1f;
-  --muted: #f5f5f7;
-  --muted-foreground: #5c5c62;
-  --accent: #f0f0f3;
-  --accent-foreground: #1d1d1f;
+  --secondary: #e8eeea;
+  --secondary-foreground: #0f1a15;
+  --muted: #f0f4f1;
+  --muted-foreground: #55625b;
+  --accent: #edf2ee;
+  --accent-foreground: #0f1a15;
   --destructive: #c4242a;
-  --border: #e5e5e8;
-  --rule: #efeff2;
-  --input: #d2d2d7;
-  --ring: #0a66d6;
+  --border: #e1e8e3;
+  --rule: #ecf1ed;
+  --input: #cbd6cf;
+  --ring: #0b7a53;
 
-  --data: #0a66d6;
-  --positive: #1e7b4f;
+  --data: #0b7a53;
+  --hue-soft: #e8f5ee;
+  --hue-track: #cde8da;
+  --hue-mid: #6db596;
+  --hue-ink: #0a4a34;
+  --positive: #0b7a53;
   --negative: #c4242a;
-  --pill-positive-bg: #dcfae5; --pill-positive-ink: #04250e;
+  --pill-positive-bg: #dff3e8; --pill-positive-ink: #0a4a34;
   --pill-negative-bg: #ffedea; --pill-negative-ink: #831c1e;
   --pill-warning-bg: #fff4d6; --pill-warning-ink: #7a3a06;
-  --pill-info-bg: #e3eefc;    --pill-info-ink: #0c3c7c;
-  --pill-neutral-bg: #ededf0; --pill-neutral-ink: #3a3a3f;
+  --pill-info-bg: #e6eef9;    --pill-info-ink: #173f73;
+  --pill-neutral-bg: #edf1ee; --pill-neutral-ink: #37423c;
 
-  --chart-1: #1d1d1f;
-  --chart-2: #8e8e93;
-  --chart-3: #0a66d6;
-  --chart-4: #d1d1d6;
-  --chart-5: #5c5c62;
-  --grid: #e8e8eb;
+  --chart-1: #0b7a53;
+  --chart-2: #6db596;
+  --chart-3: #0b7a53;
+  --chart-4: #cde8da;
+  --chart-5: #55625b;
+  --grid: #e6ece8;
 
-  --radius: 0.4rem; /* controls ~6px, cards ~9px; the sheet is 16px */
+  --radius: 0.375rem; /* controls 6px, cards ~8px */
   --sidebar: var(--frame);
-  --sidebar-foreground: #1d1d1f;
-  --sidebar-primary: #1d1d1f;
+  --sidebar-foreground: #0f1a15;
+  --sidebar-primary: #0b7a53;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e3e3e7;
-  --sidebar-accent-foreground: #1d1d1f;
-  --sidebar-border: transparent;
-  --sidebar-ring: #0a66d6;
+  --sidebar-accent: #e8f5ee;
+  --sidebar-accent-foreground: #0a4a34;
+  --sidebar-border: #e1e8e3;
+  --sidebar-ring: #0b7a53;
 
   /* Motion: short and quiet; feedback, never a show. */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -112,52 +122,56 @@
 }
 
 .dark {
-  /* True neutral dark: a black frame, the sheet one step up, cards one more. */
-  --frame: #000000;
-  --background: #141415;
-  --foreground: #f5f5f7;
-  --card: #1c1c1e;
-  --card-foreground: #f5f5f7;
-  --popover: #232325;
-  --popover-foreground: #f5f5f7;
-  --primary: #f5f5f7;
-  --primary-foreground: #0a0a0a;
-  --secondary: #2a2a2d;
-  --secondary-foreground: #f5f5f7;
-  --muted: #232325;
-  --muted-foreground: #a1a1a6;
-  --accent: #2a2a2d;
-  --accent-foreground: #f5f5f7;
+  /* True neutral dark with the same ladder: elevation by lightness, the hue on data. */
+  --frame: #0b0d0c;
+  --background: #0b0d0c;
+  --foreground: #f1f5f3;
+  --card: #141716;
+  --card-foreground: #f1f5f3;
+  --popover: #1b1f1d;
+  --popover-foreground: #f1f5f3;
+  --primary: #2fbf85;
+  --primary-foreground: #04130c;
+  --secondary: #232826;
+  --secondary-foreground: #f1f5f3;
+  --muted: #1b1f1d;
+  --muted-foreground: #a4aea9;
+  --accent: #232826;
+  --accent-foreground: #f1f5f3;
   --destructive: #ff6b6b;
-  --border: #2c2c2f;
-  --rule: #242427;
-  --input: #3a3a3d;
-  --ring: #4c9bff;
+  --border: #262c29;
+  --rule: #1e2321;
+  --input: #38423d;
+  --ring: #2fbf85;
 
-  --data: #4c9bff;
-  --positive: #3fc07a;
+  --data: #2fbf85;
+  --hue-soft: #10261c;
+  --hue-track: #1b3e2e;
+  --hue-mid: #23805b;
+  --hue-ink: #8fe3bd;
+  --positive: #2fbf85;
   --negative: #ff6b6b;
-  --pill-positive-bg: #12291b; --pill-positive-ink: #5fd394;
+  --pill-positive-bg: #10261c; --pill-positive-ink: #6fd9a8;
   --pill-negative-bg: #321a1d; --pill-negative-ink: #ff8a8a;
   --pill-warning-bg: #2e2410;  --pill-warning-ink: #f5b95a;
   --pill-info-bg: #142540;     --pill-info-ink: #8ab9ff;
-  --pill-neutral-bg: #2a2a2d;  --pill-neutral-ink: #c7c7cc;
+  --pill-neutral-bg: #232826;  --pill-neutral-ink: #c4ccc7;
 
-  --chart-1: #f5f5f7;
-  --chart-2: #8e8e93;
-  --chart-3: #4c9bff;
-  --chart-4: #48484a;
-  --chart-5: #a1a1a6;
-  --grid: #2a2a2d;
+  --chart-1: #2fbf85;
+  --chart-2: #23805b;
+  --chart-3: #2fbf85;
+  --chart-4: #1b3e2e;
+  --chart-5: #a4aea9;
+  --grid: #232826;
 
   --sidebar: var(--frame);
-  --sidebar-foreground: #f5f5f7;
-  --sidebar-primary: #f5f5f7;
-  --sidebar-primary-foreground: #0a0a0a;
-  --sidebar-accent: #232325;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: transparent;
-  --sidebar-ring: #4c9bff;
+  --sidebar-foreground: #f1f5f3;
+  --sidebar-primary: #2fbf85;
+  --sidebar-primary-foreground: #04130c;
+  --sidebar-accent: #10261c;
+  --sidebar-accent-foreground: #8fe3bd;
+  --sidebar-border: #1e2321;
+  --sidebar-ring: #2fbf85;
 }
 
 @layer base {

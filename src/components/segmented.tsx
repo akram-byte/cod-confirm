@@ -50,7 +50,7 @@ export function Segmented({
       ref={track}
       aria-label={label}
       aria-busy={pending || undefined}
-      className={cn("relative flex gap-1 overflow-x-auto rounded-lg bg-muted p-1 [scrollbar-width:none]", !full && "w-fit max-w-full", className)}
+      className={cn("relative flex gap-1 overflow-x-auto rounded-lg bg-secondary p-1 [scrollbar-width:none]", !full && "w-fit max-w-full", className)}
     >
       {pill && (
         <span

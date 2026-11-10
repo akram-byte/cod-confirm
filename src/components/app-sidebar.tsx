@@ -1,10 +1,11 @@
 "use client";
 
-import { useTransition } from "react";
+import { Suspense, useEffect, useRef, useTransition } from "react";
+import Form from "next/form";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Languages, LogOut, Moon, Sun } from "lucide-react";
+import { Languages, LogOut, Moon, Search, Sun } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -39,7 +40,9 @@ export function AppSidebar({ storeName, toConfirm }: { storeName: string; toConf
   };
   const other = locale === "ar" ? "fr" : "ar";
   const dark = resolvedTheme === "dark";
-  const item = "h-8 text-muted-foreground transition-colors duration-150 data-active:text-foreground";
+  // The ladder: an active row is the palest tint with the hue's dark ink; only its icon takes the full hue.
+  const item =
+    "h-8 text-muted-foreground transition-colors duration-150 hover:text-foreground data-active:font-medium data-active:text-sidebar-accent-foreground data-active:[&>svg]:text-primary";
   // The active pill is one element that glides between rows (32px rows on a 34px pitch).
   const activeIndex = NAV.findIndex((n) => n.key === active);
 
@@ -47,12 +50,11 @@ export function AppSidebar({ storeName, toConfirm }: { storeName: string; toConf
     <Sidebar
       side={dir === "rtl" ? "right" : "left"}
       dir={dir}
-      variant="inset"
       collapsible="icon"
       mobileTitle={t.nav.menu}
       mobileDescription={t.nav.menuDescription}
     >
-      <SidebarHeader className="pt-4">
+      <SidebarHeader className="gap-3 pt-5">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<Link href="/" />} onClick={close} className="hover:bg-transparent">
@@ -64,10 +66,13 @@ export function AppSidebar({ storeName, toConfirm }: { storeName: string; toConf
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+        <Suspense fallback={<div className="h-8 group-data-[collapsible=icon]:hidden" />}>
+          <OrderSearch />
+        </Suspense>
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup className="pt-3">
+        <SidebarGroup className="pt-2">
           <SidebarGroupContent className="relative">
             <span
               aria-hidden
@@ -81,14 +86,16 @@ export function AppSidebar({ storeName, toConfirm }: { storeName: string; toConf
                     render={<Link href={n.href} />}
                     isActive={active === n.key}
                     tooltip={t.nav[n.key]}
-                    className={`${item} data-active:bg-transparent data-active:hover:bg-transparent hover:bg-sidebar-accent/50`}
+                    className={`${item} data-active:bg-transparent data-active:hover:bg-transparent hover:bg-accent`}
                     onClick={close}
                   >
                     <n.icon strokeWidth={1.6} />
                     <span>{t.nav[n.key]}</span>
                   </SidebarMenuButton>
                   {n.key === "confirmation" && toConfirm > 0 && (
-                    <SidebarMenuBadge className="text-foreground tabular-nums">{toConfirm}</SidebarMenuBadge>
+                    <SidebarMenuBadge className="h-5 min-w-5 rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground tabular-nums peer-hover/menu-button:text-primary-foreground peer-data-active/menu-button:text-primary-foreground">
+                      {toConfirm}
+                    </SidebarMenuBadge>
                   )}
                 </SidebarMenuItem>
               ))}
@@ -97,7 +104,7 @@ export function AppSidebar({ storeName, toConfirm }: { storeName: string; toConf
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="pb-4">
+      <SidebarFooter className="border-t border-sidebar-border pt-3 pb-4">
         <SidebarMenu className="gap-0.5">
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -131,5 +138,57 @@ export function AppSidebar({ storeName, toConfirm }: { storeName: string; toConf
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
+  );
+}
+
+/** One order search for the whole app, at the top of the sidebar. "/" or Ctrl+K focuses it. */
+function OrderSearch() {
+  const { t } = useI18n();
+  const pathname = usePathname();
+  const q = useSearchParams().get("q") ?? "";
+  const { isMobile, setOpenMobile } = useSidebar();
+  const input = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement;
+      if (el.closest("input, textarea, select, [contenteditable=true]")) return;
+      if (e.key === "/" || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k")) {
+        e.preventDefault();
+        input.current?.focus();
+        input.current?.select();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  return (
+    <Form
+      action="/orders"
+      role="search"
+      className="group-data-[collapsible=icon]:hidden"
+      key={pathname === "/orders" ? q : "search"}
+      onSubmit={() => {
+        if (isMobile) setOpenMobile(false);
+      }}
+    >
+      <label className="relative block">
+        <span className="sr-only">{t.header.searchLabel}</span>
+        <Search className="pointer-events-none absolute start-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+        <input
+          ref={input}
+          name="q"
+          type="search"
+          defaultValue={pathname === "/orders" ? q : ""}
+          placeholder={t.header.search}
+          autoComplete="off"
+          className="h-9 w-full rounded-md border border-sidebar-border bg-card ps-8 pe-8 text-sm text-ellipsis transition-[border-color,box-shadow] duration-150 outline-none placeholder:text-muted-foreground hover:border-input focus:border-ring focus:ring-3 focus:ring-ring/25 md:h-8 [&::-webkit-search-cancel-button]:hidden"
+        />
+        <kbd className="pointer-events-none absolute end-2 top-1/2 hidden -translate-y-1/2 rounded border bg-muted px-1.5 font-sans text-[11px] leading-4 text-muted-foreground md:block">
+          /
+        </kbd>
+      </label>
+    </Form>
   );
 }
