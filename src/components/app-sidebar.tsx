@@ -39,12 +39,15 @@ export function AppSidebar({ storeName, toConfirm }: { storeName: string; toConf
   };
   const other = locale === "ar" ? "fr" : "ar";
   const dark = resolvedTheme === "dark";
-  const item = "h-8 text-muted-foreground data-active:text-foreground";
+  const item = "h-8 text-muted-foreground transition-colors duration-150 data-active:text-foreground";
+  // The active pill is one element that glides between rows (32px rows on a 34px pitch).
+  const activeIndex = NAV.findIndex((n) => n.key === active);
 
   return (
     <Sidebar
       side={dir === "rtl" ? "right" : "left"}
       dir={dir}
+      variant="inset"
       collapsible="icon"
       mobileTitle={t.nav.menu}
       mobileDescription={t.nav.menuDescription}
@@ -65,15 +68,20 @@ export function AppSidebar({ storeName, toConfirm }: { storeName: string; toConf
 
       <SidebarContent>
         <SidebarGroup className="pt-3">
-          <SidebarGroupContent>
-            <SidebarMenu className="gap-0.5">
+          <SidebarGroupContent className="relative">
+            <span
+              aria-hidden
+              className="glide absolute inset-x-0 top-0 h-8 rounded-md bg-sidebar-accent"
+              style={{ transform: `translateY(${activeIndex * 34}px)`, opacity: activeIndex < 0 ? 0 : 1 }}
+            />
+            <SidebarMenu className="relative gap-0.5">
               {NAV.map((n) => (
                 <SidebarMenuItem key={n.key}>
                   <SidebarMenuButton
                     render={<Link href={n.href} />}
                     isActive={active === n.key}
                     tooltip={t.nav[n.key]}
-                    className={item}
+                    className={`${item} data-active:bg-transparent data-active:hover:bg-transparent hover:bg-sidebar-accent/50`}
                     onClick={close}
                   >
                     <n.icon strokeWidth={1.6} />

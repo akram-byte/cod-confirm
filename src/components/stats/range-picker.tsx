@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/i18n/client";
-import { cn } from "@/lib/utils";
+import { Segmented } from "@/components/segmented";
 
 const PRESETS = ["today", "7d", "30d", "month"] as const;
 
@@ -18,21 +18,11 @@ export function RangePicker({ from, to, preset }: { from: string; to: string; pr
 
   return (
     <div className="flex flex-wrap items-end gap-2">
-      <div className="flex flex-wrap gap-1 rounded-lg bg-muted p-1">
-        {PRESETS.map((p) => (
-          <button
-            key={p}
-            type="button"
-            onClick={() => router.replace(`${pathname}?range=${p}`)}
-            className={cn(
-              "rounded-md px-3 py-1 text-sm font-medium",
-              preset === p ? "bg-card text-foreground ring-1 ring-border" : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {t.stats.ranges[p]}
-          </button>
-        ))}
-      </div>
+      <Segmented
+        label={t.stats.rangeLabel}
+        value={preset}
+        items={PRESETS.map((p) => ({ key: p, label: t.stats.ranges[p], href: `${pathname}?range=${p}` }))}
+      />
       <form
         className="flex flex-wrap items-center gap-1.5"
         onSubmit={(e) => {

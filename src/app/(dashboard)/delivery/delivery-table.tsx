@@ -44,6 +44,8 @@ export function DeliveryTable({ tab, rows, total }: { tab: Tab; rows: DeliveryRo
   const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pending, startTransition] = useTransition();
+  // Rows fold away the moment an action is chosen; they come back only if the server refuses.
+  const [leaving, setLeaving] = useState<Set<string>>(new Set());
   const allSelected = rows.length > 0 && selected.size === rows.length;
   const editableTracking = tab === "CONFIRMED" || tab === "SHIPPED";
 
@@ -73,9 +75,11 @@ export function DeliveryTable({ tab, rows, total }: { tab: Tab; rows: DeliveryRo
   }
 
   function move(ids: string[], to: Move) {
+    setLeaving((l) => new Set([...l, ...ids]));
     startTransition(async () => {
       const res = await moveDeliveryOrders(ids, to).catch(() => ({ ok: false as const }));
       if (!res.ok) {
+        setLeaving((l) => new Set([...l].filter((id) => !ids.includes(id))));
         toast.error(t.common.error);
         return;
       }
@@ -95,7 +99,7 @@ export function DeliveryTable({ tab, rows, total }: { tab: Tab; rows: DeliveryRo
   return (
     <>
       {/* Toolbar */}
-      <div className="sticky top-14 z-[5] -mx-1 mb-3 flex flex-wrap items-center gap-2 rounded-lg bg-background px-1 py-2">
+      <div className="sticky top-12 z-[5] md:top-0 -mx-1 mb-3 flex flex-wrap items-center gap-2 rounded-lg bg-background px-1 py-2">
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
@@ -134,7 +138,7 @@ export function DeliveryTable({ tab, rows, total }: { tab: Tab; rows: DeliveryRo
       {/* Mobile: cards */}
       <ul className="space-y-2 lg:hidden">
         {rows.map((r) => (
-          <li key={r.id} className={cn("rounded-xl border bg-card p-3", selected.has(r.id) && "border-primary bg-primary/5")}>
+          <li key={r.id} className={cn("rounded-xl border bg-card p-3", selected.has(r.id) && "border-primary bg-primary/5", leaving.has(r.id) && "row-out")}>
             <div className="flex items-start gap-3">
               <input type="checkbox" className="mt-1 size-4 accent-primary" checked={selected.has(r.id)} onChange={() => toggle(r.id)} aria-label={`#${r.number}`} />
               <div className="min-w-0 flex-1">
@@ -195,7 +199,7 @@ export function DeliveryTable({ tab, rows, total }: { tab: Tab; rows: DeliveryRo
           </TableHeader>
           <TableBody>
             {rows.map((r) => (
-              <TableRow key={r.id} data-state={selected.has(r.id) ? "selected" : undefined}>
+              <TableRow key={r.id} data-state={selected.has(r.id) ? "selected" : undefined} className={cn(leaving.has(r.id) && "row-out")}>
                 <TableCell>
                   <input type="checkbox" className="size-4 accent-primary" checked={selected.has(r.id)} onChange={() => toggle(r.id)} aria-label={`#${r.number}`} />
                 </TableCell>

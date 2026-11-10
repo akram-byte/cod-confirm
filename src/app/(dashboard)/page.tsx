@@ -4,8 +4,8 @@ import { ArrowLeft, PhoneCall } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { PageIntro } from "@/components/page-intro";
 import { KpiStrip } from "@/components/stats/kpi-strip";
-import { OrdersChart } from "@/components/stats/charts";
-import { OrderOutcomes } from "@/components/stats/order-outcomes";
+import { OrdersChart } from "@/components/stats/lazy-charts";
+import { OrderJourney } from "@/components/stats/order-outcomes";
 import { StatusBadge } from "@/components/status-badge";
 import { getQueue } from "@/lib/confirmation";
 import { addDays, getStats, todayKey } from "@/lib/stats";
@@ -81,18 +81,20 @@ export default async function DashboardHome() {
       />
 
       <div className="@container mt-3">
-        <div className="grid items-start gap-3 @4xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-          <OrderOutcomes
+        <div className="grid items-stretch gap-3 @4xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+          <OrderJourney
             t={t}
             locale={locale}
             data={{
               orders: month.orders,
-              delivered: month.delivered,
-              onTheWay: month.confirmed - month.delivered - month.returned,
-              waiting: month.pending,
+              pending: month.pending,
               cancelled: month.cancelled,
+              confirmed: month.confirmed,
+              shipped: month.shipped,
+              delivered: month.delivered,
               returned: month.returned,
-              deliveredMoney: month.sales,
+              sales: month.sales,
+              returnCosts: month.returnCosts,
             }}
           />
 

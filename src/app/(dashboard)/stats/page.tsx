@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { KpiStrip } from "@/components/stats/kpi-strip";
 import { PageIntro } from "@/components/page-intro";
-import { OrdersChart, ProfitChart } from "@/components/stats/charts";
+import { OrdersChart, ProfitChart } from "@/components/stats/lazy-charts";
 import { RangePicker } from "@/components/stats/range-picker";
 import { getStats, parseRange, todayKey } from "@/lib/stats";
 import { formatDZD } from "@/lib/money";

@@ -27,6 +27,8 @@ export const fr: Dictionary = {
     account: "Compte",
     owner: "Propriétaire",
     logout: "Se déconnecter",
+    search: "Chercher une commande : n°, téléphone ou nom",
+    searchLabel: "Rechercher dans les commandes",
   },
   login: {
     title: "Connexion",
@@ -369,6 +371,7 @@ export const fr: Dictionary = {
     tracking: "N° de suivi",
   },
   stats: {
+    rangeLabel: "Période",
     ranges: {
       today: "Aujourd'hui",
       "7d": "7 jours",
@@ -460,6 +463,17 @@ export const fr: Dictionary = {
     notFoundText: "Cet élément a peut-être été supprimé ou le lien est incorrect.",
   },
   home: {
+    journey: {
+      returnCosts: "Coût des retours",
+      title: "Parcours des commandes · 30 derniers jours",
+      steps: { received: "Reçues", confirmed: "Confirmées", shipped: "Expédiées", delivered: "Livrées" },
+      total: "{count} commandes",
+      ofReceived: "{pct} des reçues",
+      waiting: "{count} attendent un appel",
+      cancelled: "{count} annulées",
+      toShip: "{count} à expédier",
+      returned: "{count} retournées",
+    },
     findingWaiting: "{count} commandes attendent un appel",
     findingToday: "{count} reçues aujourd'hui",
     findingClear: "Personne n'attend d'appel pour l'instant.",

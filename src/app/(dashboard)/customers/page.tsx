@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Segmented } from "@/components/segmented";
 import { ChevronLeft, ChevronRight, Search, Users } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -109,20 +110,11 @@ export default async function CustomersPage({ searchParams }: PageProps<"/custom
           <Search className="pointer-events-none absolute top-1/2 start-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input name="q" type="search" defaultValue={q} placeholder={t.customers.searchPlaceholder} className="h-10 ps-9" aria-label={t.common.search} />
         </form>
-        <nav className="flex flex-wrap gap-1.5">
-          {tabs.map((tab) => (
-            <Link
-              key={tab.key}
-              href={href({ filter: tab.key, page: "" })}
-              className={cn(
-                "rounded-full border px-3 py-1 text-sm",
-                filter === tab.key ? "border-transparent bg-secondary font-medium text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground",
-              )}
-            >
-              {tab.label}
-            </Link>
-          ))}
-        </nav>
+        <Segmented
+          label={t.pages.customers.title}
+          value={filter || "all"}
+          items={tabs.map((tab) => ({ key: tab.key || "all", label: tab.label, href: href({ filter: tab.key, page: "" }) }))}
+        />
       </div>
 
       {rows.length === 0 ? (
@@ -165,10 +157,10 @@ export default async function CustomersPage({ searchParams }: PageProps<"/custom
               <TableHeader>
                 <TableRow>
                   <TableHead>{t.customers.columns.customer}</TableHead>
-                  <TableHead className="text-center">{t.customers.columns.orders}</TableHead>
-                  <TableHead className="text-center">{t.customers.columns.delivered}</TableHead>
-                  <TableHead className="text-center">{t.customers.columns.returned}</TableHead>
-                  <TableHead className="text-center">{t.customers.columns.cancelled}</TableHead>
+                  <TableHead className="text-end">{t.customers.columns.orders}</TableHead>
+                  <TableHead className="text-end">{t.customers.columns.delivered}</TableHead>
+                  <TableHead className="text-end">{t.customers.columns.returned}</TableHead>
+                  <TableHead className="text-end">{t.customers.columns.cancelled}</TableHead>
                   <TableHead>{t.customers.columns.lastOrder}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -186,12 +178,12 @@ export default async function CustomersPage({ searchParams }: PageProps<"/custom
                         <span className="rtl:float-right">{c.phone}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-center tabular-nums">{c.stats.total}</TableCell>
-                    <TableCell className="text-center tabular-nums">{c.stats.delivered}</TableCell>
-                    <TableCell className={cn("text-center tabular-nums", c.stats.returned > 0 && "font-medium text-negative")}>
+                    <TableCell className="text-end tabular-nums">{c.stats.total}</TableCell>
+                    <TableCell className="text-end tabular-nums">{c.stats.delivered}</TableCell>
+                    <TableCell className={cn("text-end tabular-nums", c.stats.returned > 0 && "font-medium text-negative")}>
                       {c.stats.returned}
                     </TableCell>
-                    <TableCell className={cn("text-center tabular-nums", c.stats.cancelled === 0 && "text-muted-foreground")}>
+                    <TableCell className={cn("text-end tabular-nums", c.stats.cancelled === 0 && "text-muted-foreground")}>
                       {c.stats.cancelled}
                     </TableCell>
                     <TableCell className="text-muted-foreground tabular-nums">{c.lastOrder ? formatDate(c.lastOrder, locale) : "—"}</TableCell>

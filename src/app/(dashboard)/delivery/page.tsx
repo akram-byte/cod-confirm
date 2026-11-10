@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Truck } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { PageIntro } from "@/components/page-intro";
@@ -8,7 +7,7 @@ import { DELIVERY_TABS, type DeliveryTab } from "@/lib/delivery";
 import { risksFor } from "@/lib/customers";
 import { formatDateTime } from "@/lib/format";
 import { getWilaya, wilayaLabel } from "@/lib/algeria";
-import { cn } from "@/lib/utils";
+import { Segmented } from "@/components/segmented";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { DeliveryTable } from "./delivery-table";
 
@@ -69,22 +68,13 @@ export default async function DeliveryPage({ searchParams }: PageProps<"/deliver
     <>
       <PageIntro title={t.pages.delivery.title} description={t.pages.delivery.description} />
 
-      <nav className="mb-4 flex gap-1 overflow-x-auto rounded-lg bg-muted p-1" aria-label={t.pages.delivery.title}>
-        {DELIVERY_TABS.map((s) => (
-          <Link
-            key={s}
-            href={`/delivery?tab=${s}`}
-            replace
-            className={cn(
-              "flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap",
-              s === tab ? "bg-card text-foreground ring-1 ring-border" : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {t.delivery.tabs[s]}
-            <span className="rounded-full bg-muted-foreground/15 px-1.5 text-xs tabular-nums">{countOf(s)}</span>
-          </Link>
-        ))}
-      </nav>
+      <Segmented
+        full
+        className="mb-4"
+        label={t.pages.delivery.title}
+        value={tab}
+        items={DELIVERY_TABS.map((s) => ({ key: s, label: t.delivery.tabs[s], count: countOf(s), href: `/delivery?tab=${s}` }))}
+      />
 
       {rows.length === 0 ? (
         <EmptyState icon={Truck} title={t.delivery.emptyTitle} description={t.delivery.emptyText} />

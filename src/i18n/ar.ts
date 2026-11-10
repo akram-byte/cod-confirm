@@ -26,6 +26,8 @@ export const ar = {
     account: "الحساب",
     owner: "صاحب المتجر",
     logout: "تسجيل الخروج",
+    search: "ابحث عن طلب: الرقم، الهاتف أو الاسم",
+    searchLabel: "البحث في الطلبات",
   },
   login: {
     title: "تسجيل الدخول",
@@ -368,6 +370,7 @@ export const ar = {
     tracking: "رقم التتبع",
   },
   stats: {
+    rangeLabel: "الفترة",
     ranges: {
       today: "اليوم",
       "7d": "7 أيام",
@@ -459,6 +462,17 @@ export const ar = {
     notFoundText: "ربما تم حذف هذا العنصر أو أن الرابط غير صحيح.",
   },
   home: {
+    journey: {
+      returnCosts: "تكلفة المرتجعات",
+      title: "مسار الطلبات · آخر 30 يومًا",
+      steps: { received: "وصلت", confirmed: "مؤكدة", shipped: "شُحنت", delivered: "سُلّمت" },
+      total: "{count} طلبًا",
+      ofReceived: "{pct} من الواردة",
+      waiting: "{count} تنتظر مكالمة",
+      cancelled: "{count} ملغاة",
+      toShip: "{count} للشحن",
+      returned: "{count} مرتجعة",
+    },
     findingWaiting: "{count} طلبية تنتظر الاتصال",
     findingToday: "{count} وصلت اليوم",
     findingClear: "لا أحد ينتظر الاتصال الآن.",
