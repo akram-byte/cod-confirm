@@ -38,11 +38,24 @@ function defaultFees(code: number) {
   return { homeFee: 700, deskFee: 450 };
 }
 
+// Demo products (French, mixed categories). Prices and costs in DZD.
 const PRODUCTS = [
-  { slug: "montre-classique", name: "ساعة يد كلاسيكية", price: 3900, cost: 1600, description: "ساعة رجالية بسوار جلدي" },
-  { slug: "ensemble-cuisine", name: "طقم أواني مطبخ 12 قطعة", price: 6500, cost: 3200, description: "طقم غير لاصق" },
-  { slug: "creme-visage", name: "كريم العناية بالبشرة", price: 2400, cost: 700, description: "كريم طبيعي 50 مل" },
+  { slug: "montre-connectee-sport", name: "Montre connectée sport", price: 5900, cost: 2800, description: "Écran tactile, suivi cardiaque, notifications, étanche IP67" },
+  { slug: "ecouteurs-bluetooth", name: "Écouteurs Bluetooth sans fil", price: 3200, cost: 1300, description: "Autonomie 20 h avec boîtier de charge, réduction de bruit" },
+  { slug: "montre-homme-classique", name: "Montre homme classique", price: 3900, cost: 1600, description: "Boîtier acier, bracelet cuir véritable" },
+  { slug: "serum-visage-vitamine-c", name: "Sérum visage vitamine C", price: 2400, cost: 700, description: "Éclat et anti-taches, flacon 30 ml" },
+  { slug: "huile-argan-bio", name: "Huile d'argan bio", price: 1800, cost: 600, description: "100 % pure, pressée à froid, 100 ml" },
+  { slug: "set-casseroles-12-pieces", name: "Set de casseroles 12 pièces", price: 6500, cost: 3200, description: "Revêtement antiadhésif, tous feux dont induction" },
+  { slug: "robot-hachoir-electrique", name: "Hachoir électrique multifonction", price: 3500, cost: 1500, description: "Bol 2 L, 4 lames inox, 300 W" },
+  { slug: "lampe-led-rechargeable", name: "Lampe LED rechargeable", price: 1500, cost: 500, description: "3 modes d'éclairage, batterie 8 h, câble USB inclus" },
+  { slug: "sac-a-dos-antivol", name: "Sac à dos antivol", price: 3600, cost: 1400, description: "Port USB, compartiment ordinateur 15,6\", imperméable" },
+  { slug: "baskets-running-homme", name: "Baskets running homme", price: 4800, cost: 2200, description: "Semelle amortissante, tailles 40 à 45" },
+  { slug: "aspirateur-voiture-portable", name: "Aspirateur voiture portable", price: 2900, cost: 1100, description: "Sans fil, 120 W, filtre lavable" },
+  { slug: "tapis-yoga-antiderapant", name: "Tapis de yoga antidérapant", price: 2200, cost: 800, description: "Épaisseur 6 mm, sangle de transport offerte" },
 ];
+
+// Slugs of the earlier Arabic demo products: hidden (not deleted) so old orders keep working.
+const LEGACY_SLUGS = ["montre-classique", "ensemble-cuisine", "creme-visage"];
 
 const FIRST = ["محمد", "أمينة", "ياسين", "سارة", "كريم", "نسرين", "عبد القادر", "إيمان", "رياض", "خديجة", "سفيان", "مريم", "هشام", "فاطمة", "بلال", "ليلى"];
 const LAST = ["بن علي", "بوزيد", "حمادي", "مرابط", "سعيدي", "بلقاسم", "شريف", "زروقي", "عمراني", "بن يوسف"];
@@ -94,6 +107,7 @@ async function main() {
   for (const p of PRODUCTS) {
     products.push(await db.product.upsert({ where: { slug: p.slug }, update: {}, create: p }));
   }
+  await db.product.updateMany({ where: { slug: { in: LEGACY_SLUGS } }, data: { active: false } });
   console.log(`✓ ${products.length} demo products`);
 
   // 4. Demo customers + orders (only when empty)
