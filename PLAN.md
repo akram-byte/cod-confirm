@@ -43,7 +43,7 @@ Tick boxes as work is finished. Each phase should end working and tested.
 - [x] Mobile check of every page, RTL check
 - [x] Settings: store name, delivery fees editor
 - [x] Settings: password change
-- [ ] Deploy demo (Vercel + Neon), demo data
+- [x] Deploy demo (Vercel + Neon), demo data
 - [x] README (setup for a new client, deploy, reset-password script)
 - [x] Screenshots, short demo video
 
