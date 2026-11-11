@@ -1,4 +1,4 @@
-# COD Confirm — Project Context
+# Confirmi — Project Context
 
 ## What this is
 A clean, simple **dashboard app for one Algerian online seller** who sells with **cash on delivery (COD)**,

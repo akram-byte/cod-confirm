@@ -1,6 +1,6 @@
-# COD Confirm
+# Confirmi
 
-A simple dashboard for **one Algerian online seller** who sells with **cash on delivery**.
+**Confirmi** (Darja for "confirm it", كونفيرمي) is a simple dashboard for **one Algerian online seller** who sells with **cash on delivery**.
 It cuts fake orders and returned parcels, makes confirming orders fast, and shows the real profit.
 
 Arabic (right-to-left) by default, French as second language. Works on phone and laptop.

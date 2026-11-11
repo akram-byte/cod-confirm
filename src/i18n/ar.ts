@@ -1,7 +1,7 @@
 // Arabic (default). Every UI string lives here and in fr.ts.
 export const ar = {
   app: {
-    name: "تأكيد الطلبيات",
+    name: "كونفيرمي",
     tagline: "تأكيد الطلبيات، تتبع التوصيل والأرباح",
   },
   nav: {

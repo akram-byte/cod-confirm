@@ -2,7 +2,7 @@ import type { Dictionary } from "./ar";
 
 export const fr: Dictionary = {
   app: {
-    name: "COD Confirm",
+    name: "Confirmi",
     tagline: "Confirmation des commandes, livraison et bénéfices",
   },
   nav: {
