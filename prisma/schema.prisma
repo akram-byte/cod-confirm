@@ -45,6 +45,7 @@ model Settings {
   storeName        String   @default("")
   passwordHash     String
   whatsappTemplate String   @default("")
+  courierSyncedAt  DateTime? // last time parcel statuses were read from the courier
   updatedAt        DateTime @updatedAt
 }
 
@@ -94,6 +95,11 @@ model Order {
   duplicate      Boolean      @default(false) // same phone + same product within 24h
   callbackAt     DateTime?
   trackingNumber String?
+  courier        String? // "yalidine" / "demo" when the parcel was created through the courier API
+  courierStatus  String? // courier's own status text, e.g. "Sorti en livraison"
+  labelUrl       String? // printable shipping label from the courier
+  stopDeskId     Int? // courier office chosen for DESK delivery
+  stopDeskName   String?
   returnCost     Int          @default(0) // DZD lost on a returned parcel
   note           String?
   confirmedAt    DateTime?

@@ -19,6 +19,9 @@ One install = one seller. To sell it, deploy a separate copy (and a separate dat
   Badges show on orders, the confirmation screen and the delivery list.
 - **Delivery**: To ship / On the road / Delivered / Returned, tracking numbers, bulk actions,
   Excel and CSV export for the delivery company.
+- **Courier (optional, Yalidine)**: send confirmed orders to the courier in one click (tracking number and
+  label come back), choose the stop desk for desk orders, statuses refresh on their own and parcels move to
+  Delivered / Returned by themselves. `COURIER=demo` runs a fake courier for development and demos.
 - **Stats**: confirmation, delivery and return rates, profit
   (delivered sales − product cost − delivery fees − return costs − ad spend), daily ad spend entry, charts.
 - **Settings**: store name, products, delivery fees for all 69 wilayas, WhatsApp message, password.
@@ -77,6 +80,18 @@ You need Node.js 20+ and a free [Neon](https://neon.tech) PostgreSQL database (S
    ```
 
    Open http://localhost:3000 and sign in with `OWNER_PASSWORD`.
+
+## Courier setup (Yalidine)
+
+1. In the seller's Yalidine account: *Développement → API*, copy the **API ID** and **API Token**.
+2. In the server's environment set `COURIER=yalidine`, `YALIDINE_API_ID`, `YALIDINE_API_TOKEN` and
+   `COURIER_FROM_WILAYA` (wilaya code the seller ships from, e.g. `16`).
+3. First live test: send **one** order, check it in the Yalidine dashboard (name, phone, commune, amount),
+   then delete that parcel there while it is still "En préparation".
+
+The amount sent is the order total, with `freeshipping` on, so the courier collects exactly what the
+customer was told and takes its fee from the payout. Without `COURIER`, the delivery page works as before
+(manual statuses + Excel/CSV export).
 
 ## Deploy
 

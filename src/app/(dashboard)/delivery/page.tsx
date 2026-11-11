@@ -5,7 +5,8 @@ import { PageIntro } from "@/components/page-intro";
 import { db } from "@/lib/db";
 import { DELIVERY_TABS, type DeliveryTab } from "@/lib/delivery";
 import { risksFor } from "@/lib/customers";
-import { formatDateTime } from "@/lib/format";
+import { formatAgo, formatDateTime } from "@/lib/format";
+import { getCourier, syncInBackgroundIfStale } from "@/lib/courier";
 import { getWilaya, wilayaLabel } from "@/lib/algeria";
 import { Segmented } from "@/components/segmented";
 import { getDictionary, getLocale } from "@/i18n/server";
@@ -30,7 +31,8 @@ export default async function DeliveryPage({ searchParams }: PageProps<"/deliver
   const tab: DeliveryTab = (DELIVERY_TABS as readonly string[]).includes(String(sp.tab)) ? (sp.tab as DeliveryTab) : "CONFIRMED";
   const field = DATE_FIELD[tab];
 
-  const [t, locale, counts, orders] = await Promise.all([
+  const courier = getCourier();
+  const [t, locale, counts, orders, settings] = await Promise.all([
     getDictionary(),
     getLocale(),
     db.order.groupBy({ by: ["status"], where: { status: { in: [...DELIVERY_TABS] } }, _count: { _all: true } }),
@@ -41,7 +43,11 @@ export default async function DeliveryPage({ searchParams }: PageProps<"/deliver
       take: LIMIT,
       include: { items: { select: { productName: true, quantity: true } } },
     }),
+    courier ? db.settings.findUnique({ where: { id: 1 }, select: { courierSyncedAt: true } }) : null,
   ]);
+
+  const syncedAt = settings?.courierSyncedAt ?? null;
+  syncInBackgroundIfStale(syncedAt);
   const countOf = (s: DeliveryTab) => counts.find((c) => c.status === s)?._count._all ?? 0;
   const risks = await risksFor(orders.map((o) => o.customerId));
 
@@ -59,6 +65,11 @@ export default async function DeliveryPage({ searchParams }: PageProps<"/deliver
       total: o.total,
       returnCost: o.returnCost,
       tracking: o.trackingNumber ?? "",
+      wilayaCode: o.wilayaCode,
+      viaCourier: !!o.courier,
+      courierStatus: o.courierStatus ?? "",
+      labelUrl: o.labelUrl ?? "",
+      stopDeskName: o.stopDeskName ?? "",
       date: at ? formatDateTime(at, locale) : "",
       risk: risks.get(o.customerId),
     };
@@ -79,7 +90,13 @@ export default async function DeliveryPage({ searchParams }: PageProps<"/deliver
       {rows.length === 0 ? (
         <EmptyState icon={Truck} title={t.delivery.emptyTitle} description={t.delivery.emptyText} />
       ) : (
-        <DeliveryTable key={tab} tab={tab} rows={rows} total={countOf(tab)} />
+        <DeliveryTable
+          key={tab}
+          tab={tab}
+          rows={rows}
+          total={countOf(tab)}
+          courier={courier && { label: courier.label, syncedAgo: syncedAt ? formatAgo(syncedAt, locale) : null }}
+        />
       )}
     </>
   );

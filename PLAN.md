@@ -47,5 +47,13 @@ Tick boxes as work is finished. Each phase should end working and tested.
 - [x] README (setup for a new client, deploy, reset-password script)
 - [x] Screenshots, short demo video
 
+## Phase 7 — Courier API (v2)
+- [x] Courier module with one shape for every courier; `COURIER` env picks it (none / demo / yalidine)
+- [x] Demo courier (no account) for development and demos
+- [x] Yalidine adapter: create parcels, read statuses, stop desks, wilaya/commune name matching
+- [x] Delivery page: "Send to courier" bulk action, desk picker, courier status + label, refresh button
+- [x] Statuses refresh in the background (max every 10 min); Delivered / Returned closed automatically
+- [ ] Live test with a real Yalidine account (first client)
+
 ## Later (v2 ideas)
-- Yalidine / ZR Express API, WhatsApp Business API, stock management.
+- ZR Express API, WhatsApp Business API, stock management.
