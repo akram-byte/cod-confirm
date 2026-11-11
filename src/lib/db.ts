@@ -7,7 +7,11 @@ function createClient() {
   if (!connectionString) {
     throw new Error("DATABASE_URL is not set. Copy .env.example to .env and fill it in.");
   }
-  return new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+  // Keep idle connections open for a while: opening a new TLS connection to Neon costs
+  // several round trips, and pg's default closes them after only 10s of quiet.
+  return new PrismaClient({
+    adapter: new PrismaPg({ connectionString, idleTimeoutMillis: 5 * 60_000 }),
+  });
 }
 
 // Reuse one client in development (hot reload would otherwise open many connections).

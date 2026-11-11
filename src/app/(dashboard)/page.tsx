@@ -27,14 +27,15 @@ const NEXT_CALLS = 5;
 // Screen question: "What needs doing now, and where are my orders ending up?"
 export default async function DashboardHome() {
   const today = todayKey();
-  const [t, locale, todayOrders, { queue }, month, last14] = await Promise.all([
+  const [t, locale, todayOrders, { queue }, month] = await Promise.all([
     getDictionary(),
     getLocale(),
     db.order.count({ where: { createdAt: { gte: startOfDay(today)! } } }),
     getQueue(),
     getStats({ from: addDays(today, -29), to: today }),
-    getStats({ from: addDays(today, -13), to: today }),
   ]);
+  // The 14-day chart is the tail of the 30-day numbers (no second query).
+  const last14Days = month.days.slice(-14);
   const toConfirm = queue.length;
   const next = queue.slice(0, NEXT_CALLS);
 
@@ -166,7 +167,7 @@ export default async function DashboardHome() {
         </div>
         <OrdersChart
           className="aspect-auto h-56 w-full"
-          data={last14.days.map(({ day, orders, confirmed, delivered, profit }) => ({
+          data={last14Days.map(({ day, orders, confirmed, delivered, profit }) => ({
             day,
             orders,
             confirmed,

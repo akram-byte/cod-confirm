@@ -88,7 +88,7 @@ You need Node.js 20+ and a free [Neon](https://neon.tech) PostgreSQL database (S
 3. Add the environment variables `DATABASE_URL`, `DIRECT_URL` and `SESSION_SECRET`
    (no need for `OWNER_PASSWORD` on Vercel).
 4. Run `npm run db:deploy` and `npm run db:seed` once from your computer with the same `.env`.
-5. Deploy. Use a Neon region close to Vercel's (e.g. Frankfurt `eu-central-1`) so pages stay fast.
+5. Deploy. `vercel.json` runs the app in Frankfurt (`fra1`); create the Neon project in Frankfurt (`eu-central-1`) too, so every database call stays local and pages stay fast.
 6. Check the live site: open `/login`, sign in, then open `/order/montre-connectee-sport` (demo product)
    and place a test order. It should appear in *Confirmation*.
 

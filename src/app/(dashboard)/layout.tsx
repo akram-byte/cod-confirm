@@ -6,9 +6,11 @@ import { requireOwner } from "@/lib/auth";
 import { db } from "@/lib/db";
 
 export default async function DashboardLayout({ children }: LayoutProps<"/">) {
-  await requireOwner();
   const now = new Date();
-  const [cookieStore, settings, toConfirm] = await Promise.all([
+  // The owner check runs alongside the reads (one database round trip instead of two);
+  // nothing is shown until it passes.
+  const [, cookieStore, settings, toConfirm] = await Promise.all([
+    requireOwner(),
     cookies(),
     db.settings.findUnique({ where: { id: 1 }, select: { storeName: true } }),
     // Same rule as the confirmation queue: the one count in the nav that needs action.
