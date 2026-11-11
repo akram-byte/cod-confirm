@@ -20,7 +20,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { BrandMark } from "@/components/brand-mark";
+import { BrandMark, Wordmark } from "@/components/brand-mark";
 import { useI18n } from "@/i18n/client";
 import { dirOf } from "@/i18n/config";
 import { setLocale } from "@/i18n/actions";
@@ -58,10 +58,11 @@ export function AppSidebar({ storeName, toConfirm }: { storeName: string; toConf
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<Link href="/" />} onClick={close} className="hover:bg-transparent">
-              <BrandMark />
-              <div className="grid flex-1 text-start leading-tight">
-                <span className="truncate font-semibold">{storeName || t.app.name}</span>
-                <span className="truncate text-xs text-muted-foreground">{t.app.name}</span>
+              {/* Collapsed to icons: the square mark. Open: the wordmark, the store's name under it. */}
+              <BrandMark className="hidden size-8! group-data-[collapsible=icon]:block" />
+              <div className="grid flex-1 gap-1 text-start leading-tight group-data-[collapsible=icon]:hidden">
+                <Wordmark className="h-[22px]! w-auto! justify-self-start" title={t.app.name} />
+                {storeName && <span className="truncate text-xs text-muted-foreground">{storeName}</span>}
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
