@@ -110,7 +110,14 @@ async function main() {
   await db.product.updateMany({ where: { slug: { in: LEGACY_SLUGS } }, data: { active: false } });
   console.log(`✓ ${products.length} demo products`);
 
-  // 4. Demo customers + orders (only when empty)
+  // 4. Demo customers + orders (only when empty).
+  // `npm run db:reset-demo` first wipes orders (items + calls cascade), customers and ad spend.
+  if (process.argv.includes("--reset-demo")) {
+    const { count } = await db.order.deleteMany();
+    await db.customer.deleteMany();
+    await db.adSpend.deleteMany();
+    console.log(`✓ Reset: ${count} orders, all customers and ad spend deleted`);
+  }
   if ((await db.order.count()) > 0) {
     console.log("• Orders already exist — demo orders skipped");
     return;
