@@ -55,5 +55,10 @@ Tick boxes as work is finished. Each phase should end working and tested.
 - [x] Statuses refresh in the background (max every 10 min); Delivered / Returned closed automatically
 - [ ] Live test with a real Yalidine account (first client)
 
+## Phase 8 — Ad pixels (v2)
+- [x] Meta + TikTok Pixel IDs in Settings (validated, empty = off)
+- [x] Order page: PageView, ViewContent, InitiateCheckout (once), Purchase / CompletePayment with total + event id
+- [ ] Optional later: server-side Conversions API (needs the seller's access token)
+
 ## Later (v2 ideas)
 - ZR Express API, WhatsApp Business API, stock management.

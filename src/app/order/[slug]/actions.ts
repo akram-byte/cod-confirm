@@ -5,7 +5,7 @@ import { createOrder, fieldErrors, orderInputSchema, type FieldErrors } from "@/
 import { clientIp, hit } from "@/lib/rate-limit";
 
 export type PublicOrderState =
-  | { ok: true; number: number }
+  | { ok: true; number: number; id: string; total: number }
   | { ok: false; errors?: FieldErrors; error?: "tooMany" | "unavailable" | "unknown" };
 
 // 5 orders per device (IP) every 15 minutes.
@@ -14,7 +14,7 @@ const WINDOW_MS = 15 * 60 * 1000;
 
 export async function submitPublicOrder(formData: FormData): Promise<PublicOrderState> {
   // Honeypot: real people never see this field. Bots fill it — pretend it worked.
-  if (String(formData.get("website") ?? "").trim() !== "") return { ok: true, number: 0 };
+  if (String(formData.get("website") ?? "").trim() !== "") return { ok: true, number: 0, id: "", total: 0 };
 
   const parsed = orderInputSchema.safeParse({
     productId: formData.get("productId"),
@@ -38,7 +38,7 @@ export async function submitPublicOrder(formData: FormData): Promise<PublicOrder
       return { ok: false, errors: { [result.error === "commune" ? "communeId" : "wilayaCode"]: result.error } };
     }
     revalidatePath("/orders");
-    return { ok: true, number: result.number };
+    return { ok: true, number: result.number, id: result.id, total: result.total };
   } catch (e) {
     console.error("public order failed", e);
     return { ok: false, error: "unknown" };

@@ -8,6 +8,7 @@ import { formatDZD } from "@/lib/money";
 import { wilayaOptions } from "@/lib/wilaya-options";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { LanguageToggle } from "@/components/language-toggle";
+import { Pixels } from "@/components/pixels";
 import { PublicOrderForm } from "./order-form";
 
 const getProduct = cache((slug: string) =>
@@ -26,15 +27,17 @@ export default async function PublicOrderPage({ params }: PageProps<"/order/[slu
     getProduct(slug),
     getDictionary(),
     getLocale(),
-    db.settings.findUnique({ where: { id: 1 }, select: { storeName: true } }),
+    db.settings.findUnique({ where: { id: 1 }, select: { storeName: true, fbPixelId: true, tiktokPixelId: true } }),
   ]);
   if (!product || !product.active) notFound();
 
   const fees = await feeTable();
   const wilayas = wilayaOptions(locale, new Set(Object.keys(fees).map(Number)));
+  const pixelProduct = { id: product.id, name: product.name, price: product.price };
 
   return (
     <main className="min-h-svh bg-muted/40 px-4 py-6 sm:py-10">
+      <Pixels fb={settings?.fbPixelId ?? ""} tiktok={settings?.tiktokPixelId ?? ""} product={pixelProduct} />
       <div className="mx-auto w-full max-w-lg">
         <div className="mb-4 flex items-center justify-between gap-2">
           <p className="truncate font-semibold">{settings?.storeName}</p>
@@ -54,7 +57,7 @@ export default async function PublicOrderPage({ params }: PageProps<"/order/[slu
           </div>
           <div className="relative p-5">
             <h2 className="mb-4 text-base font-semibold">{t.publicOrder.title}</h2>
-            <PublicOrderForm product={{ id: product.id, price: product.price }} wilayas={wilayas} fees={fees} />
+            <PublicOrderForm product={pixelProduct} wilayas={wilayas} fees={fees} />
           </div>
         </div>
       </div>

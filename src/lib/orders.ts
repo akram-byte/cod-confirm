@@ -97,7 +97,7 @@ export async function createOrder(
   input: OrderInput,
   source: "FORM" | "MANUAL",
   opts: { feeOverride?: number } = {},
-): Promise<{ error: SaveError } | { id: string; number: number; duplicate: boolean }> {
+): Promise<{ error: SaveError } | { id: string; number: number; total: number; duplicate: boolean }> {
   const [r, dup] = await Promise.all([
     resolve(input, { feeOverride: opts.feeOverride }),
     findDuplicate(input.phone, input.productId),
@@ -142,7 +142,7 @@ export async function createOrder(
     },
     select: { id: true, number: true },
   });
-  return { ...order, duplicate };
+  return { ...order, total, duplicate };
 }
 
 /** Dashboard edit. Keeps the price snapshot when the product does not change. */

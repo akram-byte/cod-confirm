@@ -6,6 +6,7 @@ import { getDictionary, getLocale } from "@/i18n/server";
 import { formatDZD } from "@/lib/money";
 import { ProductsSection } from "./products-section";
 import { WhatsappSection } from "./whatsapp-section";
+import { PixelsSection } from "./pixels-section";
 import { DeliveryFeesSection, PasswordSection, StoreNameSection } from "./store-sections";
 import { WILAYAS, wilayaLabel } from "@/lib/algeria";
 
@@ -19,7 +20,7 @@ export default async function SettingsPage() {
     getDictionary(),
     getLocale(),
     headers(),
-    db.settings.findUnique({ where: { id: 1 }, select: { storeName: true, whatsappTemplate: true } }),
+    db.settings.findUnique({ where: { id: 1 }, select: { storeName: true, whatsappTemplate: true, fbPixelId: true, tiktokPixelId: true } }),
     db.product.findMany({
       orderBy: [{ active: "desc" }, { createdAt: "asc" }],
       include: { _count: { select: { items: true } } },
@@ -50,6 +51,7 @@ export default async function SettingsPage() {
             wilaya: locale === "ar" ? "16 - الجزائر" : "16 - Alger",
           }}
         />
+        <PixelsSection fb={settings?.fbPixelId ?? ""} tiktok={settings?.tiktokPixelId ?? ""} />
         <DeliveryFeesSection
           rows={WILAYAS.map((w) => {
             const f = feeMap.get(w.code);

@@ -46,6 +46,8 @@ model Settings {
   passwordHash     String
   whatsappTemplate String   @default("")
   courierSyncedAt  DateTime? // last time parcel statuses were read from the courier
+  fbPixelId        String    @default("") // Meta (Facebook/Instagram) Pixel ID, public
+  tiktokPixelId    String    @default("") // TikTok Pixel ID, public
   updatedAt        DateTime @updatedAt
 }
 

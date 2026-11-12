@@ -19,6 +19,9 @@ One install = one seller. To sell it, deploy a separate copy (and a separate dat
   Badges show on orders, the confirmation screen and the delivery list.
 - **Delivery**: To ship / On the road / Delivered / Returned, tracking numbers, bulk actions,
   Excel and CSV export for the delivery company.
+- **Ad pixels (Meta + TikTok)**: paste the Pixel ID in Settings. The order page sends PageView, ViewContent,
+  InitiateCheckout and, when the order is saved, Purchase (Meta) / CompletePayment (TikTok) with the order
+  total in DZD. The order id is the event id. Dashboard (manual) orders send nothing.
 - **Courier (optional, Yalidine)**: send confirmed orders to the courier in one click (tracking number and
   label come back), choose the stop desk for desk orders, statuses refresh on their own and parcels move to
   Delivered / Returned by themselves. `COURIER=demo` runs a fake courier for development and demos.

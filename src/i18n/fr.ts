@@ -275,6 +275,16 @@ export const fr: Dictionary = {
     shortcuts: "Raccourcis : 1 confirmer · 2 pas de réponse · 3 rappeler · 4 annuler · S passer",
     due: "Prévu",
   },
+  pixelSettings: {
+    title: "Pixels publicitaires (Facebook / TikTok)",
+    description: "À chaque commande du formulaire, un événement « Achat » est envoyé à Facebook et TikTok pour améliorer vos publicités.",
+    fb: "ID du Pixel Meta (Facebook / Instagram)",
+    tiktok: "ID du Pixel TikTok",
+    help: "Copiez l'ID depuis le Gestionnaire d'événements Meta, ou « Événements » dans TikTok Ads Manager. Laissez vide pour désactiver.",
+    invalid: "Vérifiez l'ID",
+    fbInvalid: "L'ID Meta est un nombre de 10 à 20 chiffres",
+    tiktokInvalid: "L'ID TikTok contient des lettres et des chiffres (ex. CQ1ABC…)",
+  },
   whatsappSettings: {
     title: "Message WhatsApp",
     description: "Le message prêt à l'emploi ouvert par le bouton WhatsApp",

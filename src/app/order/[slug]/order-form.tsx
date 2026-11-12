@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { CircleCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { useI18n } from "@/i18n/client";
 import { fill } from "@/i18n/config";
 import { formatDZD } from "@/lib/money";
 import type { WilayaOption } from "@/lib/wilaya-options";
+import { trackCheckoutStart, trackOrder, type PixelProduct } from "@/components/pixels";
 import { submitPublicOrder, type PublicOrderState } from "./actions";
 
 const EMPTY_LOCATION: LocationValue = { wilayaCode: "", communeId: "", deliveryType: "HOME", address: "" };
@@ -21,7 +22,7 @@ export function PublicOrderForm({
   wilayas,
   fees,
 }: {
-  product: { id: string; price: number };
+  product: PixelProduct;
   wilayas: WilayaOption[];
   fees: Fees;
 }) {
@@ -32,6 +33,7 @@ export function PublicOrderForm({
   const [phone, setPhone] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [location, setLocation] = useState<LocationValue>(EMPTY_LOCATION);
+  const started = useRef(false);
 
   const clear = (...fields: string[]) => setResult((r) => withoutError(r, fields));
   const fee = feeFor(fees, location);
@@ -79,7 +81,9 @@ export function PublicOrderForm({
     fd.set("address", location.deliveryType === "HOME" ? location.address : "");
     startTransition(async () => {
       try {
-        setResult(await submitPublicOrder(fd));
+        const res = await submitPublicOrder(fd);
+        if (res.ok && res.id) trackOrder(product, { id: res.id, total: res.total, quantity });
+        setResult(res);
       } catch {
         setResult({ ok: false, error: "unknown" });
       }
@@ -87,7 +91,16 @@ export function PublicOrderForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4" noValidate>
+    <form
+      onSubmit={onSubmit}
+      onFocusCapture={() => {
+        if (started.current) return;
+        started.current = true;
+        trackCheckoutStart(product);
+      }}
+      className="space-y-4"
+      noValidate
+    >
       {/* Honeypot: hidden from people, bots fill it. */}
       <div aria-hidden className="absolute -start-[9999px] h-0 w-0 overflow-hidden">
         <label>
