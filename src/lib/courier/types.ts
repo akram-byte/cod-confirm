@@ -1,6 +1,6 @@
-// Shared shape for every courier (Yalidine, the demo courier, later ZR Express…).
+// Shared shape for every courier (Yalidine, ZR Express, the demo courier).
 
-export type CourierName = "yalidine" | "demo";
+export type CourierName = "yalidine" | "zrexpress" | "demo";
 
 export type ParcelInput = {
   orderId: string; // our order id, sent as the courier's order_id
@@ -13,7 +13,7 @@ export type ParcelInput = {
   communeName: string; // French name
   products: string;
   amount: number; // DZD the courier collects from the customer (order total)
-  stopDeskId: number | null; // set for DESK delivery
+  stopDeskId: string | null; // set for DESK delivery
 };
 
 export type CreateResult =
@@ -26,7 +26,7 @@ export type ParcelState = {
   outcome: "DELIVERED" | "RETURNED" | null; // final result, when there is one
 };
 
-export type Desk = { id: number; name: string; address: string };
+export type Desk = { id: string; name: string; address: string };
 
 export interface Courier {
   name: CourierName;

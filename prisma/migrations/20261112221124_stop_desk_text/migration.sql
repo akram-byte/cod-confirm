@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Order" ALTER COLUMN "stopDeskId" SET DATA TYPE TEXT;

@@ -75,10 +75,10 @@ export async function loadDesks(wilayaCode: number) {
   }
 }
 
-export async function chooseDesk(orderId: string, deskId: number) {
+export async function chooseDesk(orderId: string, deskId: string) {
   await requireOwner();
   try {
-    const ok = await setStopDesk(String(orderId), Number(deskId));
+    const ok = await setStopDesk(String(orderId), String(deskId));
     if (ok) revalidatePath("/delivery");
     return { ok };
   } catch (e) {

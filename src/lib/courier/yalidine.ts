@@ -117,7 +117,7 @@ export const yalidineCourier: Courier = {
           weight: 1,
           freeshipping: true,
           is_stopdesk: p.stopDeskId !== null,
-          ...(p.stopDeskId !== null && { stopdesk_id: p.stopDeskId }),
+          ...(p.stopDeskId !== null && { stopdesk_id: Number(p.stopDeskId) }),
           has_exchange: false,
         });
       }
@@ -160,6 +160,6 @@ export const yalidineCourier: Courier = {
     const w = await matchWilaya(wilayaCode, wilayaName);
     if (!w) return [];
     const centers = await all<YCenter>("/centers/", { wilaya_id: w.id });
-    return centers.map((c) => ({ id: c.center_id, name: c.name, address: c.address }));
+    return centers.map((c) => ({ id: String(c.center_id), name: c.name, address: c.address }));
   },
 };

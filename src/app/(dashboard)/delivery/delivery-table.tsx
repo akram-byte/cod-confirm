@@ -396,7 +396,7 @@ function CourierLine({ row }: { row: DeliveryRow }) {
 /** Courier office for a stop-desk order: the list loads from the courier on first click. */
 function DeskPicker({ id, wilayaCode, current }: { id: string; wilayaCode: number; current: string }) {
   const { t } = useI18n();
-  const [desks, setDesks] = useState<{ id: number; name: string; address: string }[] | null>(null);
+  const [desks, setDesks] = useState<{ id: string; name: string; address: string }[] | null>(null);
   const [name, setName] = useState(current);
   const [pending, startTransition] = useTransition();
 
@@ -409,7 +409,7 @@ function DeskPicker({ id, wilayaCode, current }: { id: string; wilayaCode: numbe
     });
   }
 
-  function pick(deskId: number) {
+  function pick(deskId: string) {
     const desk = desks?.find((d) => d.id === deskId);
     if (!desk) return;
     startTransition(async () => {
@@ -430,7 +430,7 @@ function DeskPicker({ id, wilayaCode, current }: { id: string; wilayaCode: numbe
         autoFocus
         defaultValue=""
         disabled={pending}
-        onChange={(e) => pick(Number(e.target.value))}
+        onChange={(e) => pick(e.target.value)}
         aria-label={t.courier.desk}
         className="h-8 w-full max-w-56 rounded-lg border border-input bg-card px-2 text-sm"
       >

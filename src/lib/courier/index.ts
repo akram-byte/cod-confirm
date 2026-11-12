@@ -5,6 +5,7 @@ import { getWilaya } from "@/lib/algeria";
 import { moveOrders } from "@/lib/delivery";
 import { demoCourier } from "./demo";
 import { yalidineCourier } from "./yalidine";
+import { zrexpressCourier } from "./zrexpress";
 import type { Courier, Desk, ParcelInput } from "./types";
 
 export type { Desk } from "./types";
@@ -13,6 +14,7 @@ export type { Desk } from "./types";
 export function getCourier(): Courier | null {
   const name = process.env.COURIER;
   if (name === "yalidine") return yalidineCourier;
+  if (name === "zrexpress") return zrexpressCourier;
   if (name === "demo") return demoCourier;
   return null;
 }
@@ -122,7 +124,7 @@ export async function desksFor(wilayaCode: number): Promise<Desk[]> {
 }
 
 /** Saves the courier office for a DESK order (checked against the courier's own list). */
-export async function setStopDesk(orderId: string, deskId: number): Promise<boolean> {
+export async function setStopDesk(orderId: string, deskId: string): Promise<boolean> {
   const order = await db.order.findUnique({ where: { id: orderId }, select: { wilayaCode: true, status: true } });
   if (!order || order.status !== "CONFIRMED") return false;
   const desk = (await desksFor(order.wilayaCode)).find((d) => d.id === deskId);

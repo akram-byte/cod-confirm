@@ -65,5 +65,10 @@ Tick boxes as work is finished. Each phase should end working and tested.
 - [x] Alert for every form order: customer, phone, product, wilaya, total, duplicate / risk flags, confirm button
 - [x] Evening summary at 21:00 (Vercel Cron, `CRON_SECRET`), on/off in Settings; test message button
 
+## Phase 10 — ZR Express courier (v2)
+- [x] ZR Express adapter (`COURIER=zrexpress`, API key + tenant id): bulk create, labels, statuses, stop desks
+- [x] Stop desk id stored as text (ZR hubs use UUIDs; Yalidine ids still work)
+- [ ] Live test with a real ZR Express account
+
 ## Later (v2 ideas)
-- ZR Express API, WhatsApp Business API, stock management.
+- WhatsApp Business API, stock management.

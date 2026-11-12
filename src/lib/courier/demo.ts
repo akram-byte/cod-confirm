@@ -44,8 +44,8 @@ export const demoCourier: Courier = {
 
   async getDesks(wilayaCode, wilayaName) {
     return [
-      { id: wilayaCode * 100 + 1, name: `${wilayaName} Centre`, address: "Agence principale" },
-      { id: wilayaCode * 100 + 2, name: `${wilayaName} Nord`, address: "Point relais" },
+      { id: String(wilayaCode * 100 + 1), name: `${wilayaName} Centre`, address: "Agence principale" },
+      { id: String(wilayaCode * 100 + 2), name: `${wilayaName} Nord`, address: "Point relais" },
     ];
   },
 };

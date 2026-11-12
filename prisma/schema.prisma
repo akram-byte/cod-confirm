@@ -101,10 +101,10 @@ model Order {
   duplicate      Boolean      @default(false) // same phone + same product within 24h
   callbackAt     DateTime?
   trackingNumber String?
-  courier        String? // "yalidine" / "demo" when the parcel was created through the courier API
+  courier        String? // "yalidine" / "zrexpress" / "demo" when the parcel was created through the courier API
   courierStatus  String? // courier's own status text, e.g. "Sorti en livraison"
   labelUrl       String? // printable shipping label from the courier
-  stopDeskId     Int? // courier office chosen for DESK delivery
+  stopDeskId     String? // courier office chosen for DESK delivery (Yalidine number or ZR hub id)
   stopDeskName   String?
   returnCost     Int          @default(0) // DZD lost on a returned parcel
   note           String?
