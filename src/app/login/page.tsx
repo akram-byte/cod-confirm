@@ -5,6 +5,7 @@ import { isOwner } from "@/lib/auth";
 import { getDictionary } from "@/i18n/server";
 import { LoginForm } from "./login-form";
 import { LanguageToggle } from "@/components/language-toggle";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -25,7 +26,8 @@ export default async function LoginPage() {
       </section>
 
       <section className="relative flex items-center justify-center px-4 py-10">
-        <div className="absolute end-4 top-4">
+        <div className="absolute end-4 top-4 flex items-center gap-1">
+          <ThemeToggle />
           <LanguageToggle />
         </div>
         <div className="w-full max-w-sm">
