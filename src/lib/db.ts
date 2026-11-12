@@ -7,10 +7,12 @@ function createClient() {
   if (!connectionString) {
     throw new Error("DATABASE_URL is not set. Copy .env.example to .env and fill it in.");
   }
-  // Keep idle connections open for a while: opening a new TLS connection to Neon costs
-  // several round trips, and pg's default closes them after only 10s of quiet.
+  // Keep idle connections for a minute (a new TLS connection to Neon costs several round
+  // trips; pg's default is 10s), but well under Neon's 5-minute sleep: a connection kept
+  // across a sleep is dead and the next query hangs until ETIMEDOUT.
+  // keepAlive + a connect timeout make a dropped connection fail fast instead.
   return new PrismaClient({
-    adapter: new PrismaPg({ connectionString, idleTimeoutMillis: 5 * 60_000 }),
+    adapter: new PrismaPg({ connectionString, idleTimeoutMillis: 60_000, keepAlive: true, connectionTimeoutMillis: 10_000 }),
   });
 }
 

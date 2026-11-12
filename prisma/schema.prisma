@@ -48,6 +48,10 @@ model Settings {
   courierSyncedAt  DateTime? // last time parcel statuses were read from the courier
   fbPixelId        String    @default("") // Meta (Facebook/Instagram) Pixel ID, public
   tiktokPixelId    String    @default("") // TikTok Pixel ID, public
+  telegramChatId   String    @default("") // seller's Telegram chat for order alerts ("" = not connected)
+  telegramCode     String    @default("") // one-time code while connecting
+  telegramLocale   String    @default("ar") // language of the alerts
+  telegramDaily    Boolean   @default(true) // evening summary
   updatedAt        DateTime @updatedAt
 }
 

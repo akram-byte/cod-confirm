@@ -60,5 +60,10 @@ Tick boxes as work is finished. Each phase should end working and tested.
 - [x] Order page: PageView, ViewContent, InitiateCheckout (once), Purchase / CompletePayment with total + event id
 - [ ] Optional later: server-side Conversions API (needs the seller's access token)
 
+## Phase 9 — Telegram alerts (v2)
+- [x] One bot per install (`TELEGRAM_BOT_TOKEN`), seller connects in one click from Settings
+- [x] Alert for every form order: customer, phone, product, wilaya, total, duplicate / risk flags, confirm button
+- [x] Evening summary at 21:00 (Vercel Cron, `CRON_SECRET`), on/off in Settings; test message button
+
 ## Later (v2 ideas)
 - ZR Express API, WhatsApp Business API, stock management.

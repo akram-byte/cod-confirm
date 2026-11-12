@@ -19,6 +19,8 @@ One install = one seller. To sell it, deploy a separate copy (and a separate dat
   Badges show on orders, the confirmation screen and the delivery list.
 - **Delivery**: To ship / On the road / Delivered / Returned, tracking numbers, bulk actions,
   Excel and CSV export for the delivery company.
+- **Telegram alerts**: a message for every new order from the form (customer, phone, product, wilaya,
+  total, duplicate / risk warnings, button to confirm), and an evening summary at 21:00.
 - **Ad pixels (Meta + TikTok)**: paste the Pixel ID in Settings. The order page sends PageView, ViewContent,
   InitiateCheckout and, when the order is saved, Purchase (Meta) / CompletePayment (TikTok) with the order
   total in DZD. The order id is the event id. Dashboard (manual) orders send nothing.
@@ -83,6 +85,16 @@ You need Node.js 20+ and a free [Neon](https://neon.tech) PostgreSQL database (S
    ```
 
    Open http://localhost:3000 and sign in with `OWNER_PASSWORD`.
+
+## Telegram alerts setup
+
+1. In Telegram, open **@BotFather** → `/newbot` → give it a name (e.g. "Confirmi – Store name") and a username.
+2. Copy the token into `TELEGRAM_BOT_TOKEN` (and set `CRON_SECRET` to any long random string).
+3. The seller opens **Settings → Alertes Telegram → Connecter Telegram**, presses *Start* in Telegram,
+   then *Vérifier*. Done. One bot per install (each client gets their own).
+
+The evening summary runs from `vercel.json` (`0 20 * * *` = 21:00 Algiers). On a VPS add a crontab line:
+`0 20 * * * curl -s -H "Authorization: Bearer $CRON_SECRET" https://your-domain/api/cron/daily`
 
 ## Courier setup (Yalidine)
 

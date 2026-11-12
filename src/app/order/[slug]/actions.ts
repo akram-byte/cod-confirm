@@ -1,6 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import { baseUrl } from "@/lib/base-url";
+import { notifyNewOrder } from "@/lib/telegram";
 import { createOrder, fieldErrors, orderInputSchema, type FieldErrors } from "@/lib/orders";
 import { clientIp, hit } from "@/lib/rate-limit";
 
@@ -38,6 +41,9 @@ export async function submitPublicOrder(formData: FormData): Promise<PublicOrder
       return { ok: false, errors: { [result.error === "commune" ? "communeId" : "wilayaCode"]: result.error } };
     }
     revalidatePath("/orders");
+    // Telegram alert after the reply is sent: the customer never waits for it.
+    const base = await baseUrl();
+    after(() => notifyNewOrder(result.id, base).catch((e) => console.error("telegram alert failed", e)));
     return { ok: true, number: result.number, id: result.id, total: result.total };
   } catch (e) {
     console.error("public order failed", e);
