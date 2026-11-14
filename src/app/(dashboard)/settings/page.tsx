@@ -6,6 +6,7 @@ import { getDictionary, getLocale } from "@/i18n/server";
 import { formatDZD } from "@/lib/money";
 import { ProductsSection } from "./products-section";
 import { WhatsappSection } from "./whatsapp-section";
+import { AutoReplySection } from "./auto-reply-section";
 import { PixelsSection } from "./pixels-section";
 import { TelegramSection } from "./telegram-section";
 import { telegramEnabled } from "@/lib/telegram";
@@ -41,6 +42,11 @@ export default async function SettingsPage() {
         <ProductsSection
           baseUrl={`${proto}://${host}`}
           products={products.map(({ _count, ...p }) => ({ ...p, orderCount: _count.items }))}
+        />
+        <AutoReplySection
+          store={settings?.storeName ?? ""}
+          baseUrl={`${proto}://${host}`}
+          products={products.filter((p) => p.active).map((p) => ({ name: p.name, slug: p.slug }))}
         />
         <WhatsappSection
           template={settings?.whatsappTemplate ?? ""}

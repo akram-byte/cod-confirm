@@ -5,7 +5,7 @@ import { SESSION_COOKIE, verifySession } from "@/lib/session-token";
 // database, is requireOwner() in the dashboard layout and server actions.
 // The login page redirects signed-in owners itself (avoids a redirect loop
 // when an old cookie survives a password change).
-const PUBLIC_PATHS = ["/login", "/order"];
+const PUBLIC_PATHS = ["/login", "/order", "/landing"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

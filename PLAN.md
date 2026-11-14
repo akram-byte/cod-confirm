@@ -70,5 +70,13 @@ Tick boxes as work is finished. Each phase should end working and tested.
 - [x] Stop desk id stored as text (ZR hubs use UUIDs; Yalidine ids still work)
 - [ ] Live test with a real ZR Express account
 
+## Landing page
+- [x] Public `/landing` (no login): hero, order journey, confirm, risk, shipping, profit, phone, FAQ, closing
+- [x] App fragments rebuilt with the app components and sample data that adds up; Arabic + French, light + dark
+- [x] Order journey switch works by tap or keyboard with no JavaScript; contact button opens WhatsApp (`CONTACT_WHATSAPP`)
+
+## Messenger / WhatsApp orders (no API)
+- [x] Settings: copy-ready auto-reply with each active product's order link, plus Messenger/Instagram and WhatsApp Business setup steps
+
 ## Later (v2 ideas)
-- WhatsApp Business API, stock management.
+- Messenger bot (Messenger Platform, needs Meta App Review), WhatsApp Business API, stock management.

@@ -1,0 +1,106 @@
+/* Landing page motion and the order-journey switch. Transform and opacity only. */
+
+/* Headline: each line rises from behind its own baseline. */
+.lp-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
+}
+.lp-line > span {
+  display: block;
+  animation: line-up 900ms var(--ease-out) both;
+}
+.lp-line + .lp-line > span {
+  animation-delay: 110ms;
+}
+@keyframes line-up {
+  from {
+    transform: translateY(110%);
+  }
+}
+
+/* What follows the headline fades up once it has landed. */
+.lp-after {
+  animation: fade-up 600ms var(--ease-out) 380ms both;
+}
+.lp-after-late {
+  animation: fade-up 700ms var(--ease-out) 520ms both;
+}
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* Section parts rise as they enter. Where scroll timelines are missing, nothing is hidden. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .lp-reveal,
+    .lp-reveal2,
+    .lp-reveal3 {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+    .lp-reveal2 {
+      animation-range: entry 6% entry 48%;
+    }
+    .lp-reveal3 {
+      animation-range: entry 12% entry 56%;
+    }
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+}
+
+/*
+ * The journey: one radio per step. Without :has() every panel stays on view (the fallback);
+ * with it, only the checked step's panel shows. No script either way.
+ */
+@supports selector(:has(a)) {
+  .lp-journey [data-panel] {
+    display: none;
+  }
+  .lp-journey:has(input[value="ad"]:checked) [data-panel="ad"],
+  .lp-journey:has(input[value="form"]:checked) [data-panel="form"],
+  .lp-journey:has(input[value="alert"]:checked) [data-panel="alert"],
+  .lp-journey:has(input[value="call"]:checked) [data-panel="call"],
+  .lp-journey:has(input[value="courier"]:checked) [data-panel="courier"],
+  .lp-journey:has(input[value="outcome"]:checked) [data-panel="outcome"],
+  .lp-journey:has(input[value="profit"]:checked) [data-panel="profit"] {
+    display: grid;
+    animation: panel-in 260ms var(--ease-out) both;
+  }
+}
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* The phone and its alert drift a little, once. */
+.lp-float {
+  animation: float-in 900ms var(--ease-out) 200ms both;
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .lp-float {
+      animation: float-in linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 45%;
+    }
+  }
+}
+@keyframes float-in {
+  from {
+    opacity: 0;
+    transform: translateY(-24px) scale(0.96);
+  }
+}
