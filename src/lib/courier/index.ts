@@ -6,7 +6,8 @@ import { moveOrders } from "@/lib/delivery";
 import { demoCourier } from "./demo";
 import { yalidineCourier } from "./yalidine";
 import { zrexpressCourier } from "./zrexpress";
-import type { Courier, Desk, ParcelInput } from "./types";
+import { isFailedAttempt, type Courier, type Desk, type ParcelInput } from "./types";
+import { notifyFailedAttempts } from "@/lib/telegram";
 
 export type { Desk } from "./types";
 
@@ -90,9 +91,9 @@ export async function sendToCourier(ids: string[]): Promise<SendResult> {
  * Reads the status of every parcel on the road and closes the ones the courier
  * delivered or returned. Returns how many orders changed to DELIVERED / RETURNED.
  */
-export async function syncCourier(): Promise<{ checked: number; delivered: number; returned: number }> {
+export async function syncCourier(): Promise<{ checked: number; delivered: number; returned: number; failed: number }> {
   const courier = getCourier();
-  if (!courier) return { checked: 0, delivered: 0, returned: 0 };
+  if (!courier) return { checked: 0, delivered: 0, returned: 0, failed: 0 };
   const orders = await db.order.findMany({
     where: { status: "SHIPPED", courier: courier.name, trackingNumber: { not: null } },
     select: { id: true, trackingNumber: true, shippedAt: true, updatedAt: true, courierStatus: true },
@@ -102,18 +103,26 @@ export async function syncCourier(): Promise<{ checked: number; delivered: numbe
 
   const delivered: string[] = [];
   const returned: string[] = [];
+  const failed: string[] = [];
   for (const s of states) {
     const o = byTracking.get(s.tracking);
     if (!o) continue;
     if (s.status !== o.courierStatus) {
-      await db.order.updateMany({ where: { id: o.id, status: "SHIPPED" }, data: { courierStatus: s.status } });
+      // A new failed try puts the parcel back in the "Save the parcel" queue.
+      const fail = isFailedAttempt(s.status, s.outcome);
+      const u = await db.order.updateMany({
+        where: { id: o.id, status: "SHIPPED" },
+        data: { courierStatus: s.status, ...(fail && { failedAt: new Date(), rescueOpen: true, rescueResult: null }) },
+      });
+      if (fail && u.count > 0) failed.push(o.id);
     }
     if (s.outcome === "DELIVERED") delivered.push(o.id);
     if (s.outcome === "RETURNED") returned.push(o.id);
   }
   const [d, r] = await Promise.all([moveOrders(delivered, "DELIVERED"), moveOrders(returned, "RETURNED")]);
   await db.settings.update({ where: { id: 1 }, data: { courierSyncedAt: new Date() } });
-  return { checked: orders.length, delivered: d, returned: r };
+  if (failed.length > 0) await notifyFailedAttempts(failed).catch((e) => console.error("telegram failed-attempt alert failed", e));
+  return { checked: orders.length, delivered: d, returned: r, failed: failed.length };
 }
 
 export async function desksFor(wilayaCode: number): Promise<Desk[]> {

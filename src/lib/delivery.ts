@@ -45,7 +45,7 @@ export async function moveOrders(ids: string[], to: DeliveryMove): Promise<numbe
     }),
     db.order.updateMany({
       where: { id: { in: ids }, status: { in: ["DELIVERED", "RETURNED"] } },
-      data: { status: "SHIPPED", deliveredAt: null, returnedAt: null, returnCost: 0 },
+      data: { status: "SHIPPED", deliveredAt: null, returnedAt: null, returnCost: 0, payoutId: null },
     }),
   ]);
   return shipped.count + undone.count;

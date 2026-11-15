@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { CircleCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,8 @@ import { fill } from "@/i18n/config";
 import { formatDZD } from "@/lib/money";
 import type { WilayaOption } from "@/lib/wilaya-options";
 import { trackCheckoutStart, trackOrder, type PixelProduct } from "@/components/pixels";
-import { submitPublicOrder, type PublicOrderState } from "./actions";
+import { normalizePhone } from "@/lib/phone";
+import { savePublicDraft, submitPublicOrder, type PublicOrderState } from "./actions";
 
 const EMPTY_LOCATION: LocationValue = { wilayaCode: "", communeId: "", deliveryType: "HOME", address: "" };
 
@@ -34,6 +35,27 @@ export function PublicOrderForm({
   const [quantity, setQuantity] = useState(1);
   const [location, setLocation] = useState<LocationValue>(EMPTY_LOCATION);
   const started = useRef(false);
+  // One id per form visit, so the saved draft (abandoned order) is updated, not duplicated.
+  const draftToken = useRef("");
+
+  // Once the phone is valid, save what was typed (debounced). The seller can call back if no order follows.
+  const validPhone = normalizePhone(phone);
+  useEffect(() => {
+    if (!validPhone || result?.ok) return;
+    const id = setTimeout(() => {
+      draftToken.current ||= crypto.randomUUID().replace(/-/g, "");
+      savePublicDraft({
+        token: draftToken.current,
+        productId: product.id,
+        phone: validPhone,
+        customerName: name,
+        wilayaCode: location.wilayaCode || null,
+        communeId: location.communeId || null,
+        quantity,
+      }).catch(() => {});
+    }, 1200);
+    return () => clearTimeout(id);
+  }, [validPhone, name, location.wilayaCode, location.communeId, quantity, product.id, result?.ok]);
 
   const clear = (...fields: string[]) => setResult((r) => withoutError(r, fields));
   const fee = feeFor(fees, location);
@@ -60,6 +82,7 @@ export function PublicOrderForm({
           onClick={() => {
             setResult(null);
             setQuantity(1);
+            draftToken.current = "";
           }}
         >
           {t.publicOrder.another}

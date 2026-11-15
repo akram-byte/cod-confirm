@@ -78,5 +78,14 @@ Tick boxes as work is finished. Each phase should end working and tested.
 ## Messenger / WhatsApp orders (no API)
 - [x] Settings: copy-ready auto-reply with each active product's order link, plus Messenger/Instagram and WhatsApp Business setup steps
 
+## Phase 11 — Save money (v2)
+- [x] "Save the parcel": courier failed attempt → call queue (Will receive / No answer / Refuses), Telegram alert, manual flag without courier API
+- [x] Courier cash check: money the courier collected vs. money paid out
+- [x] Abandoned orders: keep the phone typed on the order form, call back list
+- [ ] Reminder on delivery day: one-click WhatsApp message to the customer
+- [ ] Wilaya return report: return rate + loss per wilaya, stop-desk-only switch
+- [ ] Cost per delivered order per product (ad spend per product)
+- [ ] Fake-order signals: form filled too fast, many phones from one device
+
 ## Later (v2 ideas)
 - Messenger bot (Messenger Platform, needs Meta App Review), WhatsApp Business API, stock management.

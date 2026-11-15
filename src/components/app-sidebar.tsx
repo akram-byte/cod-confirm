@@ -27,7 +27,7 @@ import { setLocale } from "@/i18n/actions";
 import { logout } from "@/app/login/actions";
 import { NAV, navKeyFor } from "@/components/nav";
 
-export function AppSidebar({ storeName, toConfirm }: { storeName: string; toConfirm: number }) {
+export function AppSidebar({ storeName, toConfirm, toRescue }: { storeName: string; toConfirm: number; toRescue: number }) {
   const { t, locale } = useI18n();
   const pathname = usePathname();
   const active = navKeyFor(pathname);
@@ -96,6 +96,11 @@ export function AppSidebar({ storeName, toConfirm }: { storeName: string; toConf
                   {n.key === "confirmation" && toConfirm > 0 && (
                     <SidebarMenuBadge className="h-5 min-w-5 rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground tabular-nums peer-hover/menu-button:text-primary-foreground peer-data-active/menu-button:text-primary-foreground">
                       {toConfirm}
+                    </SidebarMenuBadge>
+                  )}
+                  {n.key === "rescue" && toRescue > 0 && (
+                    <SidebarMenuBadge className="h-5 min-w-5 rounded-full bg-destructive px-1.5 text-[11px] font-semibold text-white tabular-nums peer-hover/menu-button:text-white peer-data-active/menu-button:text-white">
+                      {toRescue}
                     </SidebarMenuBadge>
                   )}
                 </SidebarMenuItem>

@@ -6,6 +6,7 @@ import { formatDZD } from "@/lib/money";
 import { startOfDay } from "@/lib/format";
 import { todayKey } from "@/lib/stats";
 import { risksFor } from "@/lib/customers";
+import { baseUrl } from "@/lib/base-url";
 import { ar } from "@/i18n/ar";
 import { fr } from "@/i18n/fr";
 import { fill, isLocale, type Locale } from "@/i18n/config";
@@ -146,6 +147,27 @@ export async function notifyNewOrder(orderId: string, baseUrl: string) {
   if (flags.length) lines.push("", ...flags.map((f) => `⚠️ ${f}`));
 
   await send(s.telegramChatId, lines.join("\n"), { text: t.open, url: `${baseUrl}/confirmation?id=${o.id}` });
+}
+
+/** One message for parcels the courier could not deliver, so the seller calls before they come back. */
+export async function notifyFailedAttempts(orderIds: string[]) {
+  if (!telegramEnabled() || orderIds.length === 0) return;
+  const [s, orders] = await Promise.all([
+    db.settings.findUnique({ where: { id: 1 }, select: { telegramChatId: true, telegramLocale: true } }),
+    db.order.findMany({ where: { id: { in: orderIds } }, orderBy: { number: "asc" }, take: 20 }),
+  ]);
+  if (!s?.telegramChatId || orders.length === 0) return;
+  const locale: Locale = isLocale(s.telegramLocale) ? s.telegramLocale : "ar";
+  const t = dict(locale);
+  const lines = [`<b>${esc(fill(t.failedTitle, { count: orderIds.length }))}</b>`, ""];
+  for (const o of orders) {
+    lines.push(`📦 #${o.number} · ${esc(o.customerName)} · <code>${o.phone}</code> · ${formatDZD(o.total, locale)}`);
+    if (o.courierStatus) lines.push(`   ↳ ${esc(o.courierStatus)}`);
+  }
+  lines.push("", t.failedHint);
+  // Runs after the response too (background sync), where request headers may be gone.
+  const base = await baseUrl().catch(() => "");
+  await send(s.telegramChatId, lines.join("\n"), base ? { text: t.failedOpen, url: `${base}/rescue` } : undefined);
 }
 
 /** Evening summary of today (Algiers time). Returns false when nothing was sent. */

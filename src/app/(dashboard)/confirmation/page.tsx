@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarClock, PartyPopper } from "lucide-react";
+import { CalendarClock, PartyPopper, ShoppingCart } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
+import { getAbandoned } from "@/lib/drafts";
 import { EmptyState } from "@/components/empty-state";
 import { PageIntro } from "@/components/page-intro";
 import { db } from "@/lib/db";
@@ -39,12 +41,21 @@ function toRow(o: QueueItem, locale: Locale, risk: QueueRow["risk"]): QueueRow {
 export default async function ConfirmationPage({ searchParams }: PageProps<"/confirmation">) {
   const sp = await searchParams;
   const requested = typeof sp.id === "string" ? sp.id : "";
-  const [t, locale, { queue, upcoming }, settings] = await Promise.all([
+  const [t, locale, { queue, upcoming }, settings, abandoned] = await Promise.all([
     getDictionary(),
     getLocale(),
     getQueue(),
     db.settings.findUnique({ where: { id: 1 }, select: { storeName: true, whatsappTemplate: true } }),
+    getAbandoned(),
   ]);
+
+  const abandonedLink = (
+    <Link href="/confirmation/abandoned" className={buttonVariants({ variant: "outline", size: "sm" })}>
+      <ShoppingCart className="size-4" />
+      {t.abandoned.title}
+      {abandoned.length > 0 && <span className="tabular-nums text-muted-foreground">{abandoned.length}</span>}
+    </Link>
+  );
 
   const upcomingList = upcoming.length > 0 && (
     <section className="mt-6">
@@ -70,7 +81,9 @@ export default async function ConfirmationPage({ searchParams }: PageProps<"/con
   if (queue.length === 0) {
     return (
       <>
-        <PageIntro title={t.pages.confirmation.title} description={t.pages.confirmation.description} />
+        <PageIntro title={t.pages.confirmation.title} description={t.pages.confirmation.description}>
+          {abandonedLink}
+        </PageIntro>
         <EmptyState icon={PartyPopper} title={t.confirm.emptyTitle} description={t.confirm.emptyText} />
         {upcomingList}
       </>
@@ -130,7 +143,9 @@ export default async function ConfirmationPage({ searchParams }: PageProps<"/con
 
   return (
     <>
-      <PageIntro title={t.pages.confirmation.title} description={fill(t.confirm.queueCount, { count: queue.length })} />
+      <PageIntro title={t.pages.confirmation.title} description={fill(t.confirm.queueCount, { count: queue.length })}>
+        {abandonedLink}
+      </PageIntro>
       <ConfirmationWorkspace current={current} queue={queue.map((o) => toRow(o, locale, risks.get(o.customerId)))} nextId={nextId} />
       {upcomingList}
     </>

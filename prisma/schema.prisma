@@ -32,6 +32,12 @@ enum OrderSource {
   MANUAL
 }
 
+enum RescueResult {
+  WILL_RECEIVE
+  NO_ANSWER
+  REFUSED
+}
+
 enum CallOutcome {
   CONFIRMED
   NO_ANSWER
@@ -66,6 +72,7 @@ model Product {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   items       OrderItem[]
+  drafts      OrderDraft[]
 }
 
 model Customer {
@@ -107,6 +114,16 @@ model Order {
   stopDeskId     String? // courier office chosen for DESK delivery (Yalidine number or ZR hub id)
   stopDeskName   String?
   returnCost     Int          @default(0) // DZD lost on a returned parcel
+  // "Save the parcel": the courier could not deliver; the seller calls the customer before it comes back.
+  failedAt       DateTime? // last failed delivery attempt (courier status or marked by hand)
+  rescueOpen     Boolean      @default(false) // waiting for the seller's call
+  rescueResult   RescueResult?
+  rescueCalls    Int          @default(0)
+  rescueNote     String?
+  rescuedAt      DateTime?
+  // Courier cash check: set when the courier paid the seller for this parcel.
+  payoutId       String?
+  payout         Payout?      @relation(fields: [payoutId], references: [id], onDelete: SetNull)
   note           String?
   confirmedAt    DateTime?
   cancelledAt    DateTime?
@@ -119,6 +136,8 @@ model Order {
   calls          CallLog[]
 
   @@index([status, createdAt])
+  @@index([rescueOpen, status])
+  @@index([status, payoutId])
   @@index([phone])
   @@index([createdAt])
 }
@@ -164,4 +183,47 @@ model AdSpend {
   note      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+/// Money the courier paid to the seller, for a set of delivered (and returned) parcels.
+model Payout {
+  id         String   @id @default(cuid())
+  receivedAt DateTime // day the seller got the money
+  amount     Int // DZD actually received
+  expected   Int // DZD the seller should have received for these parcels (estimate)
+  collected  Int // DZD the courier collected from customers for these parcels
+  note       String?
+  createdAt  DateTime @default(now())
+  orders     Order[]
+
+  @@index([receivedAt])
+}
+
+enum DraftStatus {
+  OPEN // phone typed, order not sent
+  NO_ANSWER // seller called, no answer
+  ORDERED // the customer sent the order after all
+  RECOVERED // the seller made the order from it
+  DISMISSED // not interested
+}
+
+/// Abandoned order: the customer typed a valid phone on the order form but never sent it.
+model OrderDraft {
+  id           String      @id @default(cuid())
+  token        String      @unique // random id from the customer's browser, one per form visit
+  productId    String
+  product      Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  phone        String
+  customerName String?
+  wilayaCode   Int?
+  communeId    Int?
+  quantity     Int         @default(1)
+  status       DraftStatus @default(OPEN)
+  attempts     Int         @default(0)
+  orderId      String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([status, updatedAt])
+  @@index([phone])
 }

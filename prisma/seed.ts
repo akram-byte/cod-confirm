@@ -186,6 +186,12 @@ async function main() {
         callbackAt: status === "CALLBACK" ? new Date(now + (i % 2 === 0 ? -1 : 3) * 3_600_000) : null,
         trackingNumber: ["SHIPPED", "DELIVERED", "RETURNED"].includes(status) ? `YAL-${100000 + i}` : null,
         returnCost: status === "RETURNED" ? deliveryFee : 0,
+        // Two parcels on the road the courier could not deliver ("Save the parcel" demo).
+        ...(status === "SHIPPED" && i % 2 === 0 && {
+          courierStatus: "Tentative échouée · client injoignable",
+          failedAt: new Date(now - (i - 13) * 3_600_000),
+          rescueOpen: true,
+        }),
         createdAt,
         confirmedAt: ["CONFIRMED", "SHIPPED", "DELIVERED", "RETURNED"].includes(status) ? at(3) : null,
         cancelledAt: status === "CANCELLED" ? at(2) : null,

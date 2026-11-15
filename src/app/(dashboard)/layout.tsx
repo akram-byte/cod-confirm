@@ -4,12 +4,13 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { requireOwner } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { countRescue } from "@/lib/rescue";
 
 export default async function DashboardLayout({ children }: LayoutProps<"/">) {
   const now = new Date();
   // The owner check runs alongside the reads (one database round trip instead of two);
   // nothing is shown until it passes.
-  const [, cookieStore, settings, toConfirm] = await Promise.all([
+  const [, cookieStore, settings, toConfirm, toRescue] = await Promise.all([
     requireOwner(),
     cookies(),
     db.settings.findUnique({ where: { id: 1 }, select: { storeName: true } }),
@@ -17,12 +18,13 @@ export default async function DashboardLayout({ children }: LayoutProps<"/">) {
     db.order.count({
       where: { OR: [{ status: { in: ["NEW", "NO_ANSWER"] } }, { status: "CALLBACK", callbackAt: { lte: now } }] },
     }),
+    countRescue(),
   ]);
   const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
 
   return (
     <SidebarProvider defaultOpen={defaultOpen} style={{ "--sidebar-width": "15rem" } as React.CSSProperties}>
-      <AppSidebar storeName={settings?.storeName ?? ""} toConfirm={toConfirm} />
+      <AppSidebar storeName={settings?.storeName ?? ""} toConfirm={toConfirm} toRescue={toRescue} />
       {/*
         Open plane: the sidebar sits on the page ground behind one hairline, there is no
         top bar on desktop, and the title and cards sit straight on the ground.

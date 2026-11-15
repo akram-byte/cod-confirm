@@ -4,11 +4,12 @@ import type { Courier, ParcelState } from "./types";
 /*
  * Demo courier: behaves like a real one without any account, for development and
  * for showing the app to prospects. A parcel moves one step per minute and ends
- * "Livré" (4 in 5) or "Retourné au vendeur" (1 in 5).
+ * "Livré" (4 in 5) or "Retourné au vendeur" (1 in 5). 2 in 5 have a failed try on the way.
  */
 
 const STEPS = ["En préparation", "Expédié", "Vers Wilaya", "Sorti en livraison"];
 const STEP_MS = 60_000;
+const FAILED_STEPS = 30;
 
 /** FNV-1a: well mixed, so `% 5` gives an even spread. */
 function hash(s: string) {
@@ -36,6 +37,10 @@ export const demoCourier: Courier = {
     return parcels.map(({ tracking, sentAt }): ParcelState => {
       const step = Math.floor((now - sentAt.getTime()) / STEP_MS);
       if (step < STEPS.length) return { tracking, status: STEPS[step], outcome: null };
+      // 2 in 5 parcels have a failed try first, kept 30 minutes so "Save the parcel" can be shown.
+      if (hash(tracking) % 5 <= 1 && step < STEPS.length + FAILED_STEPS) {
+        return { tracking, status: "Tentative échouée · client injoignable", outcome: null };
+      }
       return hash(tracking) % 5 === 0
         ? { tracking, status: "Retourné au vendeur", outcome: "RETURNED" }
         : { tracking, status: "Livré", outcome: "DELIVERED" };

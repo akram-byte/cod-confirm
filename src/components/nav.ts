@@ -4,6 +4,8 @@ import {
   PhoneCall,
   Users,
   Truck,
+  LifeBuoy,
+  Wallet,
   ChartColumn,
   Settings,
   type LucideIcon,
@@ -18,6 +20,8 @@ export const NAV: { key: NavKey; href: string; icon: LucideIcon }[] = [
   { key: "confirmation", href: "/confirmation", icon: PhoneCall },
   { key: "customers", href: "/customers", icon: Users },
   { key: "delivery", href: "/delivery", icon: Truck },
+  { key: "rescue", href: "/rescue", icon: LifeBuoy },
+  { key: "cash", href: "/cash", icon: Wallet },
   { key: "stats", href: "/stats", icon: ChartColumn },
   { key: "settings", href: "/settings", icon: Settings },
 ];

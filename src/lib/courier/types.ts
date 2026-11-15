@@ -44,3 +44,15 @@ export function normName(s: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]/g, "");
 }
+
+// Words couriers use when a delivery try did not work ("Tentative échouée", "En alerte",
+// "Echec de livraison", "Client injoignable", "Reporté", "Refusé"…), after normName.
+const FAILED_WORDS = ["tentative", "echec", "echoue", "alerte", "injoignable", "absent", "reporte", "refus", "failed", "attempt", "unreachable", "postpone"];
+
+/** True when the courier says a delivery try failed and the parcel is not back yet. */
+export function isFailedAttempt(status: string, outcome: ParcelState["outcome"]) {
+  if (outcome) return false;
+  const key = normName(status);
+  if (key.includes("resolu") || key.includes("retour") || key.includes("return")) return false;
+  return FAILED_WORDS.some((w) => key.includes(w));
+}

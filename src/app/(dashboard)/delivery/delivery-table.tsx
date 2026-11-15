@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CircleCheck, Download, FileSpreadsheet, Loader2, MapPin, Printer, RefreshCw, Send, Truck, Undo2 } from "lucide-react";
+import { CircleCheck, Download, FileSpreadsheet, LifeBuoy, Loader2, MapPin, Printer, RefreshCw, Send, Truck, Undo2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -12,6 +12,7 @@ import { useI18n } from "@/i18n/client";
 import { fill } from "@/i18n/config";
 import { formatDZD } from "@/lib/money";
 import { cn } from "@/lib/utils";
+import { markFailedAttempt } from "../rescue/actions";
 import { chooseDesk, loadDesks, moveDeliveryOrders, refreshCourierStatuses, saveTracking, sendOrdersToCourier } from "./actions";
 
 type Tab = "CONFIRMED" | "SHIPPED" | "DELIVERED" | "RETURNED";
@@ -121,6 +122,20 @@ export function DeliveryTable({ tab, rows, total, courier }: { tab: Tab; rows: D
     });
   }
 
+  function markFailed() {
+    const ids = [...selected];
+    startTransition(async () => {
+      const res = await markFailedAttempt(ids).catch(() => ({ ok: false as const, count: 0 }));
+      if (!res.ok) {
+        toast.error(t.common.error);
+        return;
+      }
+      toast.success(fill(t.delivery.markedFailed, { count: res.count }));
+      setSelected(new Set());
+      router.refresh();
+    });
+  }
+
   function refreshStatuses() {
     startTransition(async () => {
       const res = await refreshCourierStatuses().catch(() => ({ ok: false as const }));
@@ -170,6 +185,12 @@ export function DeliveryTable({ tab, rows, total, courier }: { tab: Tab; rows: D
             <Button size="sm" disabled={pending} onClick={sendToCourier}>
               {pending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
               {fill(t.courier.send, { courier: courier.label })}
+            </Button>
+          )}
+          {tab === "SHIPPED" && selected.size > 0 && (
+            <Button size="sm" variant="outline" disabled={pending} onClick={markFailed}>
+              <LifeBuoy className="size-4" />
+              {t.delivery.markFailed}
             </Button>
           )}
           {selected.size > 0 &&

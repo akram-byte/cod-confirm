@@ -1,6 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { closeDrafts } from "@/lib/drafts";
 import { normalizePhone } from "@/lib/phone";
 import { getCommune, getWilaya } from "@/lib/algeria";
 import type { OrderStatus, Prisma } from "@/generated/prisma/client";
@@ -142,6 +143,8 @@ export async function createOrder(
     },
     select: { id: true, number: true },
   });
+  // The customer (or the seller, from an abandoned form) made the order: no longer abandoned.
+  await closeDrafts(db, input.phone, product.id, order.id, source).catch((e) => console.error("close drafts failed", e));
   return { ...order, total, duplicate };
 }
 
