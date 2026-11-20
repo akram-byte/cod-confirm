@@ -1,0 +1,188 @@
+<title>Confirmi Prices</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@500;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap">
+<style>
+/* Layout: one narrow column like a phone receipt; price block is the one bold object. */
+:root {
+  --bg: #F3F6F5;
+  --surface: #FFFFFF;
+  --ink: #10231F;
+  --muted: #56706A;
+  --line: #D6E1DE;
+  --accent: #0B7A55;
+  --accent-soft: #E1F2EA;
+  --warn: #B4570B;
+  --warn-soft: #FBEDE0;
+  --display: "Readex Pro", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --body: "IBM Plex Sans Arabic", "Readex Pro", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0D1715; --surface: #14211E; --ink: #E7F0ED; --muted: #94ACA6; --line: #26362F;
+  --accent: #3CC48F; --accent-soft: #143328; --warn: #F0A262; --warn-soft: #34241A; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0D1715; --surface: #14211E; --ink: #E7F0ED; --muted: #94ACA6; --line: #26362F;
+  --accent: #3CC48F; --accent-soft: #143328; --warn: #F0A262; --warn-soft: #34241A; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.65;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 48px; }
+.wrap { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+[lang="fr"] { font-family: "Readex Pro", system-ui, sans-serif; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.brand { font-family: var(--display); font-weight: 700; font-size: 22px; letter-spacing: .2px; display: flex; align-items: center; gap: 8px; }
+.brand i { width: 22px; height: 22px; border-radius: 6px; background: var(--accent); display: inline-grid; place-items: center; }
+.brand i::after { content: ""; width: 9px; height: 5px; border: 2.5px solid var(--surface); border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px,-1px); }
+.switch { display: flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--surface); }
+.switch button { font: 600 13px var(--display); border: 0; background: transparent; color: var(--muted); padding: 5px 12px; border-radius: 999px; cursor: pointer; }
+.switch button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.switch button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(26px, 6vw, 34px); line-height: 1.3; margin: 0; text-wrap: balance; }
+.lead { color: var(--muted); margin: 8px 0 0; }
+h2 { font-family: var(--display); font-size: 18px; margin: 0 0 12px; }
+.loss { background: var(--warn-soft); border-radius: 14px; padding: 16px 18px; }
+.loss h2 { color: var(--warn); }
+.calc { display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; font-variant-numeric: tabular-nums; }
+.calc .tot { border-top: 1px dashed var(--warn); padding-top: 6px; font-weight: 600; color: var(--warn); }
+.calc span:nth-child(even) { font-family: var(--display); }
+ul.feat { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+ul.feat li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; }
+ul.feat li::before { content: ""; width: 18px; height: 18px; margin-top: 4px; border-radius: 50%; background: var(--accent-soft); box-shadow: inset 0 0 0 5px var(--accent-soft), inset 0 0 0 9px var(--accent); }
+ul.feat b { font-weight: 600; }
+ul.feat small { display: block; color: var(--muted); font-size: 14px; }
+.price { background: var(--surface); border: 1.5px solid var(--ink); border-radius: 18px; overflow: hidden; }
+.price .row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.price .row:last-child { border-bottom: 0; }
+.amt { font-family: var(--display); font-weight: 700; font-size: 26px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.amt small { font-size: 14px; font-weight: 500; color: var(--muted); }
+.price .label small { display: block; color: var(--muted); font-size: 14px; }
+.price .free { background: var(--accent-soft); }
+.price .free .amt { color: var(--accent); }
+ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: flex; flex-direction: column; gap: 10px; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 30px 1fr; gap: 10px; }
+ol.steps li::before { content: counter(s); font: 700 14px var(--display); width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--ink); display: grid; place-items: center; }
+.foot { color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div class="brand"><i aria-hidden="true"></i>Confirmi</div>
+    <div class="switch" role="group" aria-label="Language">
+      <button type="button" id="btn-ar" data-l="ar" aria-pressed="true">العربية</button>
+      <button type="button" id="btn-fr" data-l="fr" aria-pressed="false">Français</button>
+    </div>
+  </div>
+
+  <!-- ARABIC -->
+  <div id="ar" lang="ar" dir="rtl" class="wrap" style="gap:28px">
+    <header>
+      <h1>نقّص الريتور، واعرف ربحك الحقيقي</h1>
+      <p class="lead">تطبيق لتأكيد طلبيات الدفع عند الاستلام، مصنوع للبائعين في الجزائر. بالعربية وبالفرنسية، ويخدم مليح على التيليفون.</p>
+    </header>
+
+    <section class="loss">
+      <h2>قداش يخسّرك الريتور؟ (مثال)</h2>
+      <div class="calc">
+        <span>20 طرد يرجع في الشهر × 400 دج توصيل</span><span>8,000 دج</span>
+        <span>+ السلعة لي تتبلوكا والوقت لي يروح</span><span>؟</span>
+        <span class="tot">الخسارة في الشهر</span><span class="tot">+8,000 دج</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>واش يدير Confirmi</h2>
+      <ul class="feat">
+        <li><div><b>تأكيد بكليك وحدة</b><small>اتصال أو رسالة واتساب جاهزة، والنتيجة تتسجل: مؤكدة، ما ردش، عاود عيّط، ملغية.</small></div></li>
+        <li><div><b>يكشف الطلبيات الفايك</b><small>تنبيه على الزبون لي رجّع طرود قبل، الأرقام المكررة، والقائمة السوداء.</small></div></li>
+        <li><div><b>تقرير الريتور حسب الولاية</b><small>تشوف وين يرجعولك الطرود وتوقف التوصيل لهذيك الولايات بكليك.</small></div></li>
+        <li><div><b>متابعة دراهم التوصيل</b><small>تقارن واش خلّصك الليفرور مع واش تسالو.</small></div></li>
+        <li><div><b>ربحك الحقيقي</b><small>المبيعات ناقص السلعة، التوصيل، الريتور والإعلانات.</small></div></li>
+        <li><div><b>ملف Excel لشركة التوصيل</b><small>صدّر الطلبيات المؤكدة وابعثها مباشرة.</small></div></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>الأسعار</h2>
+      <div class="price">
+        <div class="row free"><div class="label">أسبوع تجربة<small>إذا ما نقصش الريتور، ما تخلّص والو</small></div><div class="amt">مجاناً</div></div>
+        <div class="row"><div class="label">التركيب<small>نركبو، نزيدو منتجاتك وأسعار التوصيل، ونعلّموك</small></div><div class="amt">15,000 <small>دج مرة وحدة</small></div></div>
+        <div class="row"><div class="label">الاستضافة والدعم<small>السيرفر، التحديثات، والمساعدة كي تحتاج</small></div><div class="amt">3,000 <small>دج / الشهر</small></div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>كيفاش نبداو</h2>
+      <ol class="steps">
+        <li>تبعثلي منتجاتك وأسعار التوصيل تاعك.</li>
+        <li>نركبلك Confirmi في 24 ساعة ونبعثلك الرابط.</li>
+        <li>تحط رابط الطلب في الإعلانات تاعك وتبدا تأكد.</li>
+        <li>بعد أسبوع نشوفو الأرقام مع بعض، وتقرر.</li>
+      </ol>
+    </section>
+
+    <p class="foot">نسخة خاصة بيك وحدك: الطلبيات والزبائن تاعك ما يشوفهم حتى واحد آخر.</p>
+  </div>
+
+  <!-- FRENCH -->
+  <div id="fr" lang="fr" dir="ltr" class="wrap" style="gap:28px" hidden>
+    <header>
+      <h1>Moins de retours, et votre vrai bénéfice</h1>
+      <p class="lead">Une app pour confirmer vos commandes en paiement à la livraison, faite pour les vendeurs en Algérie. En arabe et en français, pensée pour le téléphone.</p>
+    </header>
+
+    <section class="loss">
+      <h2>Combien vous coûtent les retours ? (exemple)</h2>
+      <div class="calc">
+        <span>20 colis retournés par mois × 400 DA de livraison</span><span>8 000 DA</span>
+        <span>+ stock bloqué et temps perdu</span><span>?</span>
+        <span class="tot">Perte par mois</span><span class="tot">+8 000 DA</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>Ce que fait Confirmi</h2>
+      <ul class="feat">
+        <li><div><b>Confirmation en 1 clic</b><small>Appel ou message WhatsApp prêt, et le résultat est enregistré : confirmée, pas de réponse, rappeler, annulée.</small></div></li>
+        <li><div><b>Détection des fausses commandes</b><small>Alerte sur les clients qui ont déjà refusé un colis, les doublons, et liste noire.</small></div></li>
+        <li><div><b>Retours par wilaya</b><small>Voyez où vos colis reviennent et coupez la livraison vers ces wilayas en un clic.</small></div></li>
+        <li><div><b>Contrôle de l'argent du livreur</b><small>Comparez ce qui a été encaissé avec ce que le livreur vous doit.</small></div></li>
+        <li><div><b>Votre vrai bénéfice</b><small>Ventes moins produit, livraison, retours et publicité.</small></div></li>
+        <li><div><b>Export Excel pour la société de livraison</b><small>Exportez les commandes confirmées et envoyez-les directement.</small></div></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Tarifs</h2>
+      <div class="price">
+        <div class="row free"><div class="label">Semaine d'essai<small>Si vos retours ne baissent pas, vous ne payez rien</small></div><div class="amt">Gratuit</div></div>
+        <div class="row"><div class="label">Installation<small>Mise en place, vos produits et tarifs de livraison, et formation</small></div><div class="amt">15 000 <small>DA une fois</small></div></div>
+        <div class="row"><div class="label">Hébergement et support<small>Serveur, mises à jour, et aide quand vous en avez besoin</small></div><div class="amt">3 000 <small>DA / mois</small></div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Comment démarrer</h2>
+      <ol class="steps">
+        <li>Vous m'envoyez vos produits et vos tarifs de livraison.</li>
+        <li>J'installe Confirmi en 24 h et je vous envoie le lien.</li>
+        <li>Vous mettez le lien de commande dans vos pubs et vous confirmez.</li>
+        <li>Après une semaine, on regarde les chiffres ensemble et vous décidez.</li>
+      </ol>
+    </section>
+
+    <p class="foot">Une installation rien que pour vous : personne d'autre ne voit vos commandes ni vos clients.</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  var ar = document.getElementById('ar'), fr = document.getElementById('fr');
+  var btns = document.querySelectorAll('.switch button');
+  function show(l) {
+    ar.hidden = l !== 'ar'; fr.hidden = l !== 'fr';
+    btns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.l === l)); });
+    document.documentElement.lang = l;
+  }
+  btns.forEach(function (b) { b.addEventListener('click', function () { show(b.dataset.l); try { history.replaceState(null, '', '#' + b.dataset.l); } catch (e) {} }); });
+  show(location.hash === '#fr' ? 'fr' : 'ar');
+  addEventListener('hashchange', function () { show(location.hash === '#fr' ? 'fr' : 'ar'); });
+})();
+</script>
