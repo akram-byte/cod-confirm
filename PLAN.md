@@ -70,6 +70,10 @@ Tick boxes as work is finished. Each phase should end working and tested.
 - [x] Stop desk id stored as text (ZR hubs use UUIDs; Yalidine ids still work)
 - [ ] Live test with a real ZR Express account
 
+## Selling readiness
+- [x] README: ZR Express setup and a handover checklist for each new client
+- [x] `npm run db:seed-client`: new client starts with no demo products or orders
+
 ## Landing page
 - [x] Public `/landing` (no login): hero, order journey, confirm, risk, shipping, profit, phone, FAQ, closing
 - [x] App fragments rebuilt with the app components and sample data that adds up; Arabic + French, light + dark

@@ -102,6 +102,12 @@ async function main() {
   }
   console.log(`✓ Delivery fees for ${WILAYAS.length} wilayas`);
 
+  // `npm run db:seed-client`: a real client starts empty (no demo products, customers or orders).
+  if (process.argv.includes("--client")) {
+    console.log("• Client install: demo products and orders skipped");
+    return;
+  }
+
   // 3. Demo products
   const products = [];
   for (const p of PRODUCTS) {

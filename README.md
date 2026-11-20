@@ -24,7 +24,7 @@ One install = one seller. To sell it, deploy a separate copy (and a separate dat
 - **Ad pixels (Meta + TikTok)**: paste the Pixel ID in Settings. The order page sends PageView, ViewContent,
   InitiateCheckout and, when the order is saved, Purchase (Meta) / CompletePayment (TikTok) with the order
   total in DZD. The order id is the event id. Dashboard (manual) orders send nothing.
-- **Courier (optional, Yalidine)**: send confirmed orders to the courier in one click (tracking number and
+- **Courier (optional, Yalidine or ZR Express)**: send confirmed orders to the courier in one click (tracking number and
   label come back), choose the stop desk for desk orders, statuses refresh on their own and parcels move to
   Delivered / Returned by themselves. `COURIER=demo` runs a fake courier for development and demos.
 - **Stats**: confirmation, delivery and return rates, profit
@@ -75,8 +75,10 @@ You need Node.js 20+ and a free [Neon](https://neon.tech) PostgreSQL database (S
 
    The seed creates the settings and password, default delivery fees for all 69 wilayas,
    three demo products and some demo orders. It is safe to run again: it never overwrites the password
-   and only adds demo orders when there are none. For a real client, delete the demo products
-   (or switch them off) in Settings and adjust the delivery fees.
+   and only adds demo orders when there are none.
+
+   **For a real client, use `npm run db:seed-client` instead**: settings, password and delivery fees only,
+   with no demo products or orders, so nothing fake shows in their stats.
 
 5. **Run it**
 
@@ -85,6 +87,18 @@ You need Node.js 20+ and a free [Neon](https://neon.tech) PostgreSQL database (S
    ```
 
    Open http://localhost:3000 and sign in with `OWNER_PASSWORD`.
+
+### Handover checklist (before the client's first real order)
+
+- [ ] **Settings → Store**: the client's store name (it shows on the order form and in WhatsApp messages).
+- [ ] Seeded with `npm run db:seed-client` (no demo data). Never run `db:reset-demo` on a client database:
+      it deletes every order and customer.
+- [ ] **Settings → Products**: add the real products (price + cost).
+- [ ] **Settings → Delivery fees**: the client's real fees per wilaya (home / stop desk).
+- [ ] **Settings → WhatsApp message**: check the text with the client.
+- [ ] Optional: Telegram alerts, Meta / TikTok Pixel IDs, courier keys (see below).
+- [ ] Place one test order from the public link on a phone, confirm it, then cancel it.
+- [ ] Give the client their order links and the password; ask them to change it in Settings.
 
 ## Telegram alerts setup
 
@@ -107,6 +121,17 @@ The evening summary runs from `vercel.json` (`0 20 * * *` = 21:00 Algiers). On a
 The amount sent is the order total, with `freeshipping` on, so the courier collects exactly what the
 customer was told and takes its fee from the payout. Without `COURIER`, the delivery page works as before
 (manual statuses + Excel/CSV export).
+
+## Courier setup (ZR Express)
+
+1. In the seller's ZR Express space: *API / intégrations*, copy the **secret API key** and the **tenant id**.
+   If the keys are refused, ask ZR Express to switch on API access for the account.
+2. In the server's environment set `COURIER=zrexpress`, `ZREXPRESS_API_KEY` and `ZREXPRESS_TENANT_ID`.
+3. First live test: send **one** order and check it in the ZR Express space (name, phone, commune, stop desk,
+   amount), then cancel it there. The endpoints follow an open-source SDK and have not yet been checked
+   against a real account, so do this test before the client ships for real.
+
+Stop desks (ZR hubs) are picked on the delivery page. The amount collected is the order total.
 
 ## Deploy
 
