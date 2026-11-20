@@ -652,6 +652,22 @@ export const fr: Dictionary = {
     notFoundTitle: "Page introuvable",
     notFoundText: "Cet élément a peut-être été supprimé ou le lien est incorrect.",
   },
+  accessEnded: {
+    title: "Votre accès a expiré",
+    text: "L'essai ou l'abonnement a pris fin le {date}. Le tableau de bord est bloqué jusqu'au renouvellement.",
+    ordersSafe: "Vos commandes sont en sécurité",
+    ordersSafeText: "Le formulaire de commande reste en ligne : vos clients peuvent commander et tout vous attend ici.",
+    waiting: "Le formulaire de commande reste en ligne. {count} commande(s) attendent votre confirmation.",
+    contact: "Renouveler sur WhatsApp",
+    contactMessage: "Bonjour, je souhaite renouveler l'abonnement Confirmi pour la boutique {store}.",
+    contactNoNumber: "Contactez la personne qui a installé Confirmi pour renouveler.",
+  },
+  accessBanner: {
+    lastDay: "Dernier jour de votre abonnement aujourd'hui.",
+    daysLeft: "Il reste {days} jours à votre abonnement (jusqu'au {date}).",
+    twoDays: "Il reste 2 jours à votre abonnement (jusqu'au {date}).",
+    after: "Ensuite le tableau de bord sera bloqué, mais le formulaire de commande restera en ligne.",
+  },
   home: {
     journey: {
       returnCosts: "Coût des retours",

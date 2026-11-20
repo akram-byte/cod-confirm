@@ -1,5 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, verifySession } from "@/lib/session-token";
+import { getAccess } from "@/lib/access";
+
+const ACCESS_ENDED_PATH = "/access-ended";
 
 // Optimistic check only (signature + expiry). The real check, against the
 // database, is requireOwner() in the dashboard layout and server actions.
@@ -15,6 +18,11 @@ export async function proxy(request: NextRequest) {
   const session = await verifySession(request.cookies.get(SESSION_COOKIE)?.value);
   if (!session) {
     return NextResponse.redirect(new URL("/login", request.url));
+  }
+  // Trial or paid period over: lock the dashboard (pages, exports and server actions).
+  // The public order form above stays open.
+  if (getAccess().state === "ended" && pathname !== ACCESS_ENDED_PATH) {
+    return NextResponse.redirect(new URL(ACCESS_ENDED_PATH, request.url));
   }
   return NextResponse.next();
 }

@@ -98,7 +98,19 @@ You need Node.js 20+ and a free [Neon](https://neon.tech) PostgreSQL database (S
 - [ ] **Settings → WhatsApp message**: check the text with the client.
 - [ ] Optional: Telegram alerts, Meta / TikTok Pixel IDs, courier keys (see below).
 - [ ] Place one test order from the public link on a phone, confirm it, then cancel it.
+- [ ] `ACCESS_UNTIL` set to the trial end date, and `CONTACT_WHATSAPP` to your number.
 - [ ] Give the client their order links and the password; ask them to change it in Settings.
+
+## Free trial and monthly access
+
+Each install can have an end date in `ACCESS_UNTIL` (`YYYY-MM-DD`, the last day included). Empty = no limit.
+
+- **3 days before** the date, every dashboard screen shows a reminder.
+- **After** the date, the dashboard (pages, exports, buttons) shows "access expired" with a WhatsApp
+  button to `CONTACT_WHATSAPP`. **The public order form keeps working**, so no order is lost.
+- **To start a trial:** set the date (e.g. today + 7 days) when you deploy.
+- **When the client pays:** in Vercel → Settings → Environment Variables, set the new date
+  (e.g. the last day of the paid month), then **Redeploy**. Environment changes only apply after a redeploy.
 
 ## Telegram alerts setup
 

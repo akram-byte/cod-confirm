@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
+import { AccessBanner } from "@/components/access-banner";
 import { requireOwner } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { countRescue } from "@/lib/rescue";
@@ -34,7 +35,10 @@ export default async function DashboardLayout({ children }: LayoutProps<"/">) {
       <SidebarInset className="min-w-0">
         <SiteHeader />
         <div className="px-4 pt-5 pb-16 md:px-10 md:pt-9">
-          <div className="mx-auto w-full max-w-[1240px]">{children}</div>
+          <div className="mx-auto w-full max-w-[1240px]">
+            <AccessBanner />
+            {children}
+          </div>
         </div>
       </SidebarInset>
     </SidebarProvider>
