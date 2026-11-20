@@ -73,7 +73,49 @@ export function WilayaReturns({ rows }: { rows: WilayaReturnRow[] }) {
               {fill(w.suggestBanner, { count: suggested })}
             </p>
           )}
-          <div className="overflow-x-auto">
+          {/* Phone: cards, so the switch is always in reach. */}
+          <ul className="divide-y md:hidden">
+            {shown.map((r) => (
+              <li key={r.wilayaCode} className="flex items-center gap-3 py-3">
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium">
+                    {r.label}
+                    {r.suggest && (
+                      <span className="ms-2 rounded bg-negative/10 px-1.5 py-0.5 text-xs font-normal text-negative">
+                        {w.suggest}
+                      </span>
+                    )}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground tabular-nums">
+                    {w.parcels}: {r.delivered} / <span className={cn(r.returned > 0 && "text-negative")}>{r.returned}</span> ·{" "}
+                    <span className={cn("font-medium", r.bad ? "text-negative" : "text-foreground")}>{pct(r.returnRate)}</span>
+                  </p>
+                  <p className="text-xs text-muted-foreground tabular-nums">
+                    {w.homeDesk}: {pct(r.homeRate)} · {pct(r.deskRate)}
+                  </p>
+                  <p className="text-xs tabular-nums">
+                    <span className="text-muted-foreground">{w.loss}: </span>
+                    {r.loss > 0 ? <span className="text-negative">− {money(r.loss)}</span> : money(0)}
+                    <span className="text-muted-foreground"> · {w.net}: </span>
+                    <span className={cn(r.net < 0 && "text-negative")}>{money(r.net)}</span>
+                  </p>
+                </div>
+                {r.hasFee && (
+                  <label className="flex shrink-0 flex-col items-center gap-1 text-[11px] text-muted-foreground">
+                    <Switch
+                      checked={r.deskOnly}
+                      disabled={pending && busy === r.wilayaCode}
+                      onCheckedChange={(v) => toggle(r, v)}
+                      aria-label={`${r.label} ${w.deskOnly}`}
+                    />
+                    {w.deskOnly}
+                  </label>
+                )}
+              </li>
+            ))}
+          </ul>
+
+          <div className="hidden overflow-x-auto md:block">
             <Table>
               <TableHeader>
                 <TableRow>
