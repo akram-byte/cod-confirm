@@ -38,7 +38,15 @@ export async function submitPublicOrder(formData: FormData): Promise<PublicOrder
   if (hit(`order:${await clientIp()}`, MAX_ORDERS, WINDOW_MS)) return { ok: false, error: "tooMany" };
 
   try {
-    const result = await createOrder(parsed.data, "FORM");
+    const fill = Number(formData.get("fillMs"));
+    const device = String(formData.get("deviceId") ?? "");
+    const result = await createOrder(parsed.data, "FORM", {
+      signals: {
+        // Missing or odd values (no JavaScript, old page) give no signal rather than a false alarm.
+        fillSeconds: Number.isFinite(fill) && fill > 0 && fill < 86_400_000 ? Math.round(fill / 1000) : null,
+        deviceId: /^[A-Za-z0-9]{16,64}$/.test(device) ? device : null,
+      },
+    });
     if ("error" in result) {
       if (result.error === "product") return { ok: false, error: "unavailable" };
       return { ok: false, errors: { [result.error === "commune" ? "communeId" : "wilayaCode"]: result.error } };

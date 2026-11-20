@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { formatDZD } from "@/lib/money";
 import type { WilayaOption } from "@/lib/wilaya-options";
 
-export type Fees = Record<number, { home: number; desk: number }>;
+export type Fees = Record<number, { home: number; desk: number; deskOnly?: boolean }>;
 export type LocationValue = {
   wilayaCode: string;
   communeId: string;
@@ -21,6 +21,7 @@ type Errors = Partial<Record<"wilayaCode" | "communeId" | "address", string>>;
 export function feeFor(fees: Fees, v: LocationValue): number | null {
   const f = fees[Number(v.wilayaCode)];
   if (!f) return null;
+  if (v.deliveryType === "HOME" && f.deskOnly) return null;
   return v.deliveryType === "HOME" ? f.home : f.desk;
 }
 
@@ -54,7 +55,12 @@ export function LocationFields({
             id="wilayaCode"
             className={selectClass}
             value={value.wilayaCode}
-            onChange={(e) => onChange({ wilayaCode: e.target.value, communeId: "" })}
+            onChange={(e) => {
+              const code = e.target.value;
+              // Stop-desk-only wilaya: switch away from home delivery.
+              const deskOnly = !!fees[Number(code)]?.deskOnly;
+              onChange({ wilayaCode: code, communeId: "", ...(deskOnly ? { deliveryType: "DESK" as const } : {}) });
+            }}
             aria-invalid={!!errors.wilayaCode}
           >
             <NativeSelectOption value="">{t.orderFields.chooseWilaya}</NativeSelectOption>
@@ -85,6 +91,7 @@ export function LocationFields({
       </div>
 
       {wilaya && !wilayaFees && <p className="text-sm text-destructive">{t.orderFields.notDelivered}</p>}
+      {wilayaFees?.deskOnly && <p className="text-sm text-muted-foreground">{t.orderFields.deskOnly}</p>}
 
       <fieldset className="space-y-1.5">
         <legend className="mb-1.5 text-sm font-medium">{t.orderFields.deliveryType}</legend>
@@ -93,12 +100,14 @@ export function LocationFields({
             const Icon = type === "HOME" ? Home : Store;
             const fee = wilayaFees ? (type === "HOME" ? wilayaFees.home : wilayaFees.desk) : null;
             const checked = value.deliveryType === type;
+            const off = type === "HOME" && !!wilayaFees?.deskOnly;
             return (
               <label
                 key={type}
                 className={cn(
                   "flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors has-focus-visible:ring-3 has-focus-visible:ring-ring/50",
                   checked ? "border-primary bg-primary/5" : "hover:bg-muted/50",
+                  off && "pointer-events-none opacity-50",
                 )}
               >
                 <input
@@ -106,13 +115,14 @@ export function LocationFields({
                   name="deliveryType"
                   value={type}
                   checked={checked}
+                  disabled={off}
                   onChange={() => onChange({ deliveryType: type })}
                   className="sr-only"
                 />
                 <Icon className={cn("size-5 shrink-0", checked ? "text-primary" : "text-muted-foreground")} />
                 <span className="min-w-0">
                   <span className="block text-sm font-medium leading-tight">{t.deliveryType[type]}</span>
-                  {fee !== null && (
+                  {fee !== null && !off && (
                     <span className="block text-xs text-muted-foreground tabular-nums">{formatDZD(fee, locale)}</span>
                   )}
                 </span>

@@ -106,6 +106,11 @@ model Order {
   source         OrderSource  @default(FORM)
   attempts       Int          @default(0)
   duplicate      Boolean      @default(false) // same phone + same product within 24h
+  // Fake-order signals (public form only): warnings for the seller, orders are never blocked.
+  fillSeconds    Int? // seconds from first touch of the form to sending it
+  deviceId       String? // random id kept in the customer's browser
+  fastFill       Boolean      @default(false) // form sent too fast for a person
+  sharedDevice   Boolean      @default(false) // this browser sent orders for several different phones
   callbackAt     DateTime?
   trackingNumber String?
   courier        String? // "yalidine" / "zrexpress" / "demo" when the parcel was created through the courier API
@@ -139,6 +144,7 @@ model Order {
   @@index([rescueOpen, status])
   @@index([status, payoutId])
   @@index([phone])
+  @@index([deviceId, createdAt])
   @@index([createdAt])
 }
 
@@ -173,6 +179,7 @@ model DeliveryFee {
   homeFee    Int // DZD
   deskFee    Int // DZD
   active     Boolean  @default(true) // false = we don't deliver there
+  deskOnly   Boolean  @default(false) // true = stop desk only (home delivery returns too often)
   updatedAt  DateTime @updatedAt
 }
 

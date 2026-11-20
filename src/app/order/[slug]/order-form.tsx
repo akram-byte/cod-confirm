@@ -18,6 +18,20 @@ import { savePublicDraft, submitPublicOrder, type PublicOrderState } from "./act
 
 const EMPTY_LOCATION: LocationValue = { wilayaCode: "", communeId: "", deliveryType: "HOME", address: "" };
 
+/** Random id kept in this browser, so the seller sees when one phone sends orders for many numbers. */
+function deviceId() {
+  try {
+    let id = localStorage.getItem("cfm_device") ?? "";
+    if (!/^[A-Za-z0-9]{16,64}$/.test(id)) {
+      id = crypto.randomUUID().replace(/-/g, "");
+      localStorage.setItem("cfm_device", id);
+    }
+    return id;
+  } catch {
+    return "";
+  }
+}
+
 export function PublicOrderForm({
   product,
   wilayas,
@@ -35,6 +49,8 @@ export function PublicOrderForm({
   const [quantity, setQuantity] = useState(1);
   const [location, setLocation] = useState<LocationValue>(EMPTY_LOCATION);
   const started = useRef(false);
+  // Fake-order signals: when the form was first touched.
+  const startedAt = useRef(0);
   // One id per form visit, so the saved draft (abandoned order) is updated, not duplicated.
   const draftToken = useRef("");
 
@@ -102,6 +118,8 @@ export function PublicOrderForm({
     fd.set("communeId", location.communeId);
     fd.set("deliveryType", location.deliveryType);
     fd.set("address", location.deliveryType === "HOME" ? location.address : "");
+    if (startedAt.current) fd.set("fillMs", String(Date.now() - startedAt.current));
+    fd.set("deviceId", deviceId());
     startTransition(async () => {
       try {
         const res = await submitPublicOrder(fd);
@@ -119,6 +137,7 @@ export function PublicOrderForm({
       onFocusCapture={() => {
         if (started.current) return;
         started.current = true;
+        startedAt.current = Date.now();
         trackCheckoutStart(product);
       }}
       className="space-y-4"

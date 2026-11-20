@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CircleCheck, Download, FileSpreadsheet, LifeBuoy, Loader2, MapPin, Printer, RefreshCw, Send, Truck, Undo2 } from "lucide-react";
+import { CircleCheck, Download, FileSpreadsheet, LifeBuoy, Loader2, MapPin, MessageCircle, Printer, RefreshCw, Send, Truck, Undo2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -28,6 +28,8 @@ export type DeliveryRow = {
   products: string;
   total: number;
   returnCost: number;
+  /** wa.me reminder for parcels on the road ("" elsewhere). */
+  remindHref: string;
   tracking: string;
   wilayaCode: number;
   viaCourier: boolean;
@@ -215,6 +217,7 @@ export function DeliveryTable({ tab, rows, total, courier }: { tab: Tab; rows: D
       </div>
 
       {tab === "RETURNED" && <p className="mb-3 text-xs text-muted-foreground">{t.delivery.returnCostHint}</p>}
+      {tab === "SHIPPED" && <p className="mb-3 text-xs text-muted-foreground">{t.delivery.remindHint}</p>}
 
       {/* Mobile: cards */}
       <ul className="space-y-2 lg:hidden">
@@ -244,6 +247,7 @@ export function DeliveryTable({ tab, rows, total, courier }: { tab: Tab; rows: D
                 <CourierLine row={r} />
                 <div className="mt-2 flex items-center gap-2">
                   <TrackingField id={r.id} value={r.tracking} editable={editableTracking && !r.viaCourier} />
+                  <RemindLink href={r.remindHref} />
                   {MOVES[tab].map((m) => {
                     const Icon = moveIcon(m);
                     return (
@@ -324,6 +328,7 @@ export function DeliveryTable({ tab, rows, total, courier }: { tab: Tab; rows: D
                 {tab === "RETURNED" && <TableCell className="text-end text-negative tabular-nums">{formatDZD(r.returnCost, locale)}</TableCell>}
                 <TableCell>
                   <div className="flex gap-1">
+                    <RemindLink href={r.remindHref} />
                     {MOVES[tab].map((m) => {
                       const Icon = moveIcon(m);
                       return (
@@ -349,6 +354,24 @@ export function DeliveryTable({ tab, rows, total, courier }: { tab: Tab; rows: D
         </Table>
       </div>
     </>
+  );
+}
+
+/** Delivery-day reminder: opens WhatsApp with the message filled in. */
+function RemindLink({ href }: { href: string }) {
+  const { t } = useI18n();
+  if (!href) return null;
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className={cn(buttonVariants({ variant: "outline", size: "icon" }), "size-8 shrink-0 text-positive")}
+      aria-label={t.delivery.remind}
+      title={t.delivery.remind}
+    >
+      <MessageCircle className="size-4" />
+    </a>
   );
 }
 

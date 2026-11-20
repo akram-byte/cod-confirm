@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { FakeSignalTags } from "@/components/fake-signal-tags";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Copy, Pencil, Phone } from "lucide-react";
@@ -68,6 +69,7 @@ export default async function OrderPage({ params }: PageProps<"/orders/[id]">) {
               {t.orders.duplicate}
             </span>
           )}
+          <FakeSignalTags fastFill={order.fastFill} sharedDevice={order.sharedDevice} fillSeconds={order.fillSeconds} labels={t.orders} />
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <StatusSelect key={order.status} orderId={order.id} status={order.status} statuses={ORDER_STATUSES} />

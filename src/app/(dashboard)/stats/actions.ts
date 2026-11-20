@@ -32,3 +32,24 @@ export async function saveAdSpend(date: string, amount: string | number) {
     return { ok: false as const };
   }
 }
+
+const deskOnlySchema = z.object({ wilayaCode: z.number().int().min(1).max(99), deskOnly: z.boolean() });
+
+/** Stop desk only for one wilaya: the order form hides home delivery there. */
+export async function setDeskOnly(wilayaCode: number, deskOnly: boolean) {
+  await requireOwner();
+  const parsed = deskOnlySchema.safeParse({ wilayaCode, deskOnly });
+  if (!parsed.success) return { ok: false as const };
+  try {
+    const res = await db.deliveryFee.updateMany({
+      where: { wilayaCode: parsed.data.wilayaCode },
+      data: { deskOnly: parsed.data.deskOnly },
+    });
+    if (res.count === 0) return { ok: false as const };
+    revalidatePath("/", "layout");
+    return { ok: true as const };
+  } catch (e) {
+    console.error("set desk only failed", e);
+    return { ok: false as const };
+  }
+}

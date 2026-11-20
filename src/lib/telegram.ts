@@ -141,6 +141,8 @@ export async function notifyNewOrder(orderId: string, baseUrl: string) {
   ];
   const flags = [
     o.duplicate && t.duplicate,
+    o.fastFill && fill(t.fastFill, { seconds: o.fillSeconds ?? 0 }),
+    o.sharedDevice && t.sharedDevice,
     risk === "blacklisted" && t.blacklisted,
     risk === "risky" && t.risky,
   ].filter(Boolean);

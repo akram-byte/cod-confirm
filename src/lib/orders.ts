@@ -50,17 +50,20 @@ export function fieldErrors(error: z.ZodError): FieldErrors {
   return out;
 }
 
-/** Fee charged to the customer, or null when we don't deliver to that wilaya. */
+/** Fee charged to the customer, or null when we don't deliver there (wilaya off, or home delivery off). */
 export async function deliveryFeeFor(wilayaCode: number, type: "HOME" | "DESK") {
   const fee = await db.deliveryFee.findUnique({ where: { wilayaCode } });
   if (!fee || !fee.active) return null;
+  if (type === "HOME" && fee.deskOnly) return null;
   return type === "HOME" ? fee.homeFee : fee.deskFee;
 }
 
 /** Active wilaya fees as a plain object, for the client-side forms. */
-export async function feeTable(): Promise<Record<number, { home: number; desk: number }>> {
+export async function feeTable(): Promise<Record<number, { home: number; desk: number; deskOnly: boolean }>> {
   const fees = await db.deliveryFee.findMany({ where: { active: true } });
-  return Object.fromEntries(fees.map((f) => [f.wilayaCode, { home: f.homeFee, desk: f.deskFee }]));
+  return Object.fromEntries(
+    fees.map((f) => [f.wilayaCode, { home: f.homeFee, desk: f.deskFee, deskOnly: f.deskOnly }]),
+  );
 }
 
 /** Same phone ordered the same product in the last 24h (ignoring `excludeId`). */
@@ -78,6 +81,29 @@ export async function findDuplicate(phone: string, productId: string, excludeId?
 }
 
 type SaveError = "product" | "commune" | "wilaya";
+
+/** Public form sent faster than this (seconds) is unlikely to be a person. */
+export const FAST_FILL_SECONDS = 8;
+/** A browser that sent orders for this many different phones in 7 days is suspicious. */
+export const SHARED_DEVICE_PHONES = 3;
+
+export type FormSignals = { fillSeconds: number | null; deviceId: string | null };
+
+/** Fake-order signals for a public form order. Never blocks the order, only warns. */
+async function fakeSignals(phone: string, s: FormSignals) {
+  const fastFill = s.fillSeconds !== null && s.fillSeconds < FAST_FILL_SECONDS;
+  let sharedDevice = false;
+  if (s.deviceId) {
+    const others = await db.order.findMany({
+      where: { deviceId: s.deviceId, phone: { not: phone }, createdAt: { gte: new Date(Date.now() - 7 * DAY_MS) } },
+      distinct: ["phone"],
+      select: { phone: true },
+      take: SHARED_DEVICE_PHONES,
+    });
+    sharedDevice = others.length + 1 >= SHARED_DEVICE_PHONES;
+  }
+  return { fillSeconds: s.fillSeconds, deviceId: s.deviceId, fastFill, sharedDevice };
+}
 
 /** Checks product, commune and delivery fee. Returns the computed values or an error key. */
 async function resolve(input: OrderInput, opts: { allowInactiveProduct?: boolean; feeOverride?: number }) {
@@ -97,11 +123,12 @@ async function resolve(input: OrderInput, opts: { allowInactiveProduct?: boolean
 export async function createOrder(
   input: OrderInput,
   source: "FORM" | "MANUAL",
-  opts: { feeOverride?: number } = {},
+  opts: { feeOverride?: number; signals?: FormSignals } = {},
 ): Promise<{ error: SaveError } | { id: string; number: number; total: number; duplicate: boolean }> {
-  const [r, dup] = await Promise.all([
+  const [r, dup, signals] = await Promise.all([
     resolve(input, { feeOverride: opts.feeOverride }),
     findDuplicate(input.phone, input.productId),
+    opts.signals ? fakeSignals(input.phone, opts.signals) : null,
   ]);
   if ("error" in r) return { error: r.error! };
   const { product, commune, deliveryFee, subtotal, total } = r;
@@ -128,6 +155,7 @@ export async function createOrder(
       total,
       source,
       duplicate,
+      ...signals,
       note: input.note || null,
       items: {
         create: [

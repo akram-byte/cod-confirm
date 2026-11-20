@@ -10,6 +10,11 @@ import { getCourier, syncInBackgroundIfStale } from "@/lib/courier";
 import { getWilaya, wilayaLabel } from "@/lib/algeria";
 import { Segmented } from "@/components/segmented";
 import { getDictionary, getLocale } from "@/i18n/server";
+import { ar } from "@/i18n/ar";
+import { fr } from "@/i18n/fr";
+import type { Locale } from "@/i18n/config";
+import { whatsappUrl } from "@/lib/confirmation";
+import { formatDZD } from "@/lib/money";
 import { DeliveryTable } from "./delivery-table";
 
 const LIMIT = 500;
@@ -43,11 +48,14 @@ export default async function DeliveryPage({ searchParams }: PageProps<"/deliver
       take: LIMIT,
       include: { items: { select: { productName: true, quantity: true } } },
     }),
-    courier ? db.settings.findUnique({ where: { id: 1 }, select: { courierSyncedAt: true } }) : null,
+    db.settings.findUnique({ where: { id: 1 }, select: { courierSyncedAt: true, storeName: true, whatsappTemplate: true } }),
   ]);
 
-  const syncedAt = settings?.courierSyncedAt ?? null;
-  syncInBackgroundIfStale(syncedAt);
+  const syncedAt = courier ? (settings?.courierSyncedAt ?? null) : null;
+  if (courier) syncInBackgroundIfStale(syncedAt);
+  // Delivery-day reminder goes to the customer: same language as the seller's WhatsApp template.
+  const msgLocale: Locale = /[؀-ۿ]/.test(settings?.whatsappTemplate ?? "") || !settings?.whatsappTemplate ? "ar" : "fr";
+  const remindTemplate = (msgLocale === "ar" ? ar : fr).delivery.remindWhatsapp;
   const countOf = (s: DeliveryTab) => counts.find((c) => c.status === s)?._count._all ?? 0;
   const risks = await risksFor(orders.map((o) => o.customerId));
 
@@ -72,6 +80,17 @@ export default async function DeliveryPage({ searchParams }: PageProps<"/deliver
       stopDeskName: o.stopDeskName ?? "",
       date: at ? formatDateTime(at, locale) : "",
       risk: risks.get(o.customerId),
+      remindHref:
+        tab === "SHIPPED"
+          ? whatsappUrl(o.phone, remindTemplate, {
+              name: o.customerName,
+              store: settings?.storeName ?? "",
+              order: `#${o.number}`,
+              product: o.items.map((i) => i.productName).join("، "),
+              total: formatDZD(o.total, msgLocale),
+              wilaya: w ? wilayaLabel(w, msgLocale) : String(o.wilayaCode),
+            })
+          : "",
     };
   });
 

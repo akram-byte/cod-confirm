@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/status-badge";
 import { RiskBadge } from "@/components/risk-badge";
+import { FakeSignalTags } from "@/components/fake-signal-tags";
 import { useI18n } from "@/i18n/client";
 import { fill } from "@/i18n/config";
 import { formatDZD } from "@/lib/money";
@@ -49,6 +50,9 @@ export type CurrentOrder = {
   total: number;
   attempts: number;
   duplicate: boolean;
+  fastFill: boolean;
+  sharedDevice: boolean;
+  fillSeconds: number | null;
   note: string | null;
   createdAt: string;
   callbackAt: string | null;
@@ -191,6 +195,7 @@ function CallCard({ order, nextId }: { order: CurrentOrder; nextId: string | nul
                 {t.orders.duplicate}
               </span>
             )}
+            <FakeSignalTags fastFill={order.fastFill} sharedDevice={order.sharedDevice} fillSeconds={order.fillSeconds} labels={t.orders} />
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
             {order.createdAt} · {t.confirm.attempts}: <span className="tabular-nums">{order.attempts}</span>

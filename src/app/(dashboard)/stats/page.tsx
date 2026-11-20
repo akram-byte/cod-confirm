@@ -9,7 +9,10 @@ import { formatPercent } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { fill } from "@/i18n/config";
+import { wilayaLabel, getWilaya } from "@/lib/algeria";
+import { BAD_RETURN_RATE, MIN_PARCELS, deskReturnRate, getWilayaReport, homeReturnRate, returnRate, suggestDeskOnly } from "@/lib/wilaya-report";
 import { AdSpendCard } from "./ad-spend";
+import { WilayaReturns, type WilayaReturnRow } from "./wilaya-returns";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -18,7 +21,26 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
   const range = parseRange(await searchParams);
-  const [t, locale, s] = await Promise.all([getDictionary(), getLocale(), getStats(range)]);
+  const [t, locale, s, report] = await Promise.all([getDictionary(), getLocale(), getStats(range), getWilayaReport(range)]);
+  const wilayaRows: WilayaReturnRow[] = report.map((r) => {
+    const w = getWilaya(r.wilayaCode);
+    const rr = returnRate(r);
+    return {
+      wilayaCode: r.wilayaCode,
+      label: w ? wilayaLabel(w, locale) : String(r.wilayaCode),
+      delivered: r.delivered,
+      returned: r.returned,
+      returnRate: rr,
+      homeRate: homeReturnRate(r),
+      deskRate: deskReturnRate(r),
+      loss: r.loss,
+      net: r.net,
+      deskOnly: r.deskOnly,
+      hasFee: r.hasFee,
+      suggest: suggestDeskOnly(r),
+      bad: rr !== null && rr >= BAD_RETURN_RATE && r.delivered + r.returned >= MIN_PARCELS,
+    };
+  });
   const money = (n: number) => formatDZD(n, locale);
   const pct = (n: number | null) => formatPercent(n, locale);
   const chartDays = s.days.map(({ day, orders, confirmed, delivered, profit }) => ({
@@ -119,6 +141,10 @@ export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
             />
           </div>
         </div>
+      </div>
+
+      <div className="mt-3">
+        <WilayaReturns rows={wilayaRows} />
       </div>
     </>
   );
