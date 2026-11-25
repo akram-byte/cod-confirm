@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { SESSION_COOKIE, verifySession } from "@/lib/session-token";
+import { SESSION_COOKIE, callerMayOpen, verifySession } from "@/lib/session-token";
 import { getAccess } from "@/lib/access";
 
 const ACCESS_ENDED_PATH = "/access-ended";
@@ -23,6 +23,11 @@ export async function proxy(request: NextRequest) {
   // The public order form above stays open.
   if (getAccess().state === "ended" && pathname !== ACCESS_ENDED_PATH) {
     return NextResponse.redirect(new URL(ACCESS_ENDED_PATH, request.url));
+  }
+  // The caller login only sees the calling screens (no money, stats or settings).
+  // Server actions check the role again on their own.
+  if (session.role === "caller" && pathname !== ACCESS_ENDED_PATH && !callerMayOpen(pathname)) {
+    return NextResponse.redirect(new URL("/confirmation", request.url));
   }
   return NextResponse.next();
 }

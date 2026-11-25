@@ -7,7 +7,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { fill } from "@/i18n/config";
-import { requireOwner } from "@/lib/auth";
+import { requireStaff } from "@/lib/auth";
 import { getAccess } from "@/lib/access";
 import { db } from "@/lib/db";
 import { formatDate } from "@/lib/format";
@@ -32,7 +32,7 @@ function contactHref(text: string) {
 export default async function AccessEndedPage() {
   const access = getAccess();
   if (access.state !== "ended") redirect("/");
-  await requireOwner();
+  await requireStaff();
 
   const [t, locale, settings, waiting] = await Promise.all([
     getDictionary(),

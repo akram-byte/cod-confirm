@@ -9,7 +9,7 @@ import { zrexpressCourier } from "./zrexpress";
 import { isFailedAttempt, type Courier, type Desk, type ParcelInput } from "./types";
 import { notifyFailedAttempts } from "@/lib/telegram";
 
-export type { Desk } from "./types";
+export type { CourierCheck, Desk } from "./types";
 
 /** The courier set by COURIER in .env, or null when the seller exports Excel by hand. */
 export function getCourier(): Courier | null {

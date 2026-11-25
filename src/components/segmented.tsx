@@ -76,7 +76,7 @@ export function Segmented({
             }}
             onMouseEnter={() => router.prefetch(it.href)}
             className={cn(
-              "relative z-[1] flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
+              "relative z-[1] flex items-center justify-center gap-1.5 rounded-md px-3.5 py-2 text-[15px] font-medium whitespace-nowrap transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
               full && "flex-1",
               on ? "text-foreground" : "text-muted-foreground hover:text-foreground",
               // Before the first measure, the chosen option carries its own pill.

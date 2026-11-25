@@ -11,6 +11,9 @@ mostly through Facebook/Instagram ads. The store owner uses it themselves every 
 
 ## Who uses it
 - **One user: the store owner.** One password-protected login. No agents, no roles, no multiple accounts.
+  - Exception (added on request): an optional **caller login**, a second password for one person who calls
+    customers for the owner. It only sees the calling screens (to confirm, abandoned orders, save the parcel)
+    and can add a new order. No money, stats or settings. Off unless the owner sets it.
 - Mostly uses it on a laptop, but often on the phone → must work well on mobile.
 - Not technical → every screen must be obvious. Fewer clicks beats more features.
 

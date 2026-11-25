@@ -3,6 +3,7 @@ import { LifeBuoy } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { PageIntro } from "@/components/page-intro";
 import { db } from "@/lib/db";
+import { getRole } from "@/lib/auth";
 import { getRescueQueue } from "@/lib/rescue";
 import { whatsappUrl } from "@/lib/confirmation";
 import { risksFor } from "@/lib/customers";
@@ -22,11 +23,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RescuePage() {
-  const [t, locale, orders, settings] = await Promise.all([
+  const [t, locale, orders, settings, role] = await Promise.all([
     getDictionary(),
     getLocale(),
     getRescueQueue(),
     db.settings.findUnique({ where: { id: 1 }, select: { storeName: true, whatsappTemplate: true, courierSyncedAt: true } }),
+    getRole(),
   ]);
   if (getCourier()) syncInBackgroundIfStale(settings?.courierSyncedAt ?? null);
 
@@ -76,7 +78,7 @@ export default async function RescuePage() {
       {rows.length === 0 ? (
         <EmptyState icon={LifeBuoy} title={t.rescue.emptyTitle} description={t.rescue.emptyText} />
       ) : (
-        <RescueList rows={rows} />
+        <RescueList rows={rows} caller={role === "caller"} />
       )}
     </>
   );

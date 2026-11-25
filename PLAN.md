@@ -53,7 +53,7 @@ Tick boxes as work is finished. Each phase should end working and tested.
 - [x] Yalidine adapter: create parcels, read statuses, stop desks, wilaya/commune name matching
 - [x] Delivery page: "Send to courier" bulk action, desk picker, courier status + label, refresh button
 - [x] Statuses refresh in the background (max every 10 min); Delivered / Returned closed automatically
-- [ ] Live test with a real Yalidine account (first client)
+- [ ] Live test with a real Yalidine account (first client): run Settings → Courier → Check connection first
 
 ## Phase 8 — Ad pixels (v2)
 - [x] Meta + TikTok Pixel IDs in Settings (validated, empty = off)
@@ -68,7 +68,7 @@ Tick boxes as work is finished. Each phase should end working and tested.
 ## Phase 10 — ZR Express courier (v2)
 - [x] ZR Express adapter (`COURIER=zrexpress`, API key + tenant id): bulk create, labels, statuses, stop desks
 - [x] Stop desk id stored as text (ZR hubs use UUIDs; Yalidine ids still work)
-- [ ] Live test with a real ZR Express account
+- [ ] Live test with a real ZR Express account: run Settings → Courier → Check connection first
 
 ## Selling readiness
 - [x] README: ZR Express setup and a handover checklist for each new client
@@ -88,8 +88,16 @@ Tick boxes as work is finished. Each phase should end working and tested.
 - [x] Abandoned orders: keep the phone typed on the order form, call back list
 - [x] Reminder on delivery day: one-click WhatsApp message to the customer (Delivery → On the road)
 - [x] Wilaya return report: return rate + loss per wilaya, stop-desk-only switch (Stats page; form hides home delivery)
-- [ ] Cost per delivered order per product (ad spend per product)
+- [x] Cost per delivered order per product (ad spend per product)
 - [x] Fake-order signals: form filled too fast, many phones from one device (warnings in confirmation, order page, Telegram)
+
+## Ready for real sellers
+- [x] Spam and login limits in the database (hold on Vercel / serverless), cleaned by the daily cron
+- [x] Courier check in Settings (read-only): keys, every commune against the courier's list, stop desks
+- [x] Communes of the new 2026 wilayas found by name when the courier still files them under the old wilaya
+- [x] Optional caller login: calling screens only (to confirm, abandoned, save the parcel, new order)
+- [x] Ad spend per product + cost per delivered order per product (Stats)
+- [ ] First real seller on a free trial (not code)
 
 ## Later (v2 ideas)
 - Messenger bot (Messenger Platform, needs Meta App Review), WhatsApp Business API, stock management.

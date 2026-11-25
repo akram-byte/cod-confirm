@@ -4,6 +4,7 @@ import { BackLink } from "@/components/back-link";
 import { OrderEditor } from "../order-editor";
 import { editorData } from "../editor-data";
 import { getDraft } from "@/lib/drafts";
+import { getRole } from "@/lib/auth";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -12,23 +13,27 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function NewOrderPage({ searchParams }: PageProps<"/orders/new">) {
   const sp = await searchParams;
-  const [t, locale, draft] = await Promise.all([
+  const [t, locale, role, draft] = await Promise.all([
     getDictionary(),
     getLocale(),
+    getRole(),
     // Coming from an abandoned order form: start with what the customer typed.
     typeof sp.draft === "string" ? getDraft(sp.draft) : null,
   ]);
   const { products, fees, wilayas } = await editorData(locale);
   const fromDraft = draft && products.some((p) => p.id === draft.productId) ? draft : null;
+  // The caller login has no order list: it comes from and goes back to the abandoned orders.
+  const back = role === "caller" ? "/confirmation/abandoned" : "/orders";
   const draftFee = fromDraft?.wilayaCode ? (fees[fromDraft.wilayaCode]?.home ?? 0) : 0;
 
   return (
     <div className="mx-auto max-w-3xl">
-      <BackLink href="/orders" label={t.common.back} />
+      <BackLink href={back} label={t.common.back} />
       <h1 className="mb-5 text-2xl font-semibold tracking-tight">{t.orders.editor.newTitle}</h1>
       <OrderEditor
         orderId={null}
-        cancelHref="/orders"
+        cancelHref={back}
+        doneHref={role === "caller" ? back : undefined}
         products={products}
         wilayas={wilayas}
         fees={fees}

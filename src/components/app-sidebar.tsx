@@ -25,12 +25,23 @@ import { useI18n } from "@/i18n/client";
 import { dirOf } from "@/i18n/config";
 import { setLocale } from "@/i18n/actions";
 import { logout } from "@/app/login/actions";
-import { NAV, navKeyFor } from "@/components/nav";
+import { navFor, tabFor } from "@/components/nav";
 
-export function AppSidebar({ storeName, toConfirm, toRescue }: { storeName: string; toConfirm: number; toRescue: number }) {
+export function AppSidebar({
+  storeName,
+  toConfirm,
+  toRescue,
+  caller = false,
+}: {
+  storeName: string;
+  toConfirm: number;
+  toRescue: number;
+  caller?: boolean;
+}) {
+  const NAV = navFor(caller);
   const { t, locale } = useI18n();
   const pathname = usePathname();
-  const active = navKeyFor(pathname);
+  const active = tabFor(pathname).group;
   const { isMobile, setOpenMobile } = useSidebar();
   const { resolvedTheme, setTheme } = useTheme();
   const [pending, startTransition] = useTransition();
@@ -42,8 +53,8 @@ export function AppSidebar({ storeName, toConfirm, toRescue }: { storeName: stri
   const dark = resolvedTheme === "dark";
   // The ladder: an active row is the palest tint with the hue's dark ink; only its icon takes the full hue.
   const item =
-    "h-8 text-muted-foreground transition-colors duration-150 hover:text-foreground data-active:font-medium data-active:text-sidebar-accent-foreground data-active:[&>svg]:text-primary";
-  // The active pill is one element that glides between rows (32px rows on a 34px pitch).
+    "h-10 text-[15px] text-muted-foreground transition-colors duration-150 hover:text-foreground data-active:font-medium data-active:text-sidebar-accent-foreground data-active:[&>svg]:text-primary";
+  // The active pill is one element that glides between rows (40px rows on a 42px pitch).
   const activeIndex = NAV.findIndex((n) => n.key === active);
 
   return (
@@ -57,7 +68,7 @@ export function AppSidebar({ storeName, toConfirm, toRescue }: { storeName: stri
       <SidebarHeader className="gap-3 pt-5">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<Link href="/" />} onClick={close} className="hover:bg-transparent">
+            <SidebarMenuButton size="lg" render={<Link href={caller ? "/confirmation" : "/"} />} onClick={close} className="hover:bg-transparent">
               {/* Collapsed to icons: the square mark. Open: the wordmark, the store's name under it. */}
               <BrandMark className="hidden size-8! group-data-[collapsible=icon]:block" />
               <div className="grid flex-1 gap-1 text-start leading-tight group-data-[collapsible=icon]:hidden">
@@ -67,9 +78,12 @@ export function AppSidebar({ storeName, toConfirm, toRescue }: { storeName: stri
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        <Suspense fallback={<div className="h-8 group-data-[collapsible=icon]:hidden" />}>
-          <OrderSearch />
-        </Suspense>
+        {/* Search opens the full order list, which is the owner's only. */}
+        {!caller && (
+          <Suspense fallback={<div className="h-8 group-data-[collapsible=icon]:hidden" />}>
+            <OrderSearch />
+          </Suspense>
+        )}
       </SidebarHeader>
 
       <SidebarContent>
@@ -77,8 +91,8 @@ export function AppSidebar({ storeName, toConfirm, toRescue }: { storeName: stri
           <SidebarGroupContent className="relative">
             <span
               aria-hidden
-              className="glide absolute inset-x-0 top-0 h-8 rounded-md bg-sidebar-accent"
-              style={{ transform: `translateY(${activeIndex * 34}px)`, opacity: activeIndex < 0 ? 0 : 1 }}
+              className="glide absolute inset-x-0 top-0 h-10 rounded-md bg-sidebar-accent"
+              style={{ transform: `translateY(${activeIndex * 42}px)`, opacity: activeIndex < 0 ? 0 : 1 }}
             />
             <SidebarMenu className="relative gap-0.5">
               {NAV.map((n) => (
@@ -90,16 +104,16 @@ export function AppSidebar({ storeName, toConfirm, toRescue }: { storeName: stri
                     className={`${item} data-active:bg-transparent data-active:hover:bg-transparent hover:bg-accent`}
                     onClick={close}
                   >
-                    <n.icon strokeWidth={1.6} />
+                    <n.icon strokeWidth={1.8} className="size-5!" />
                     <span>{t.nav[n.key]}</span>
                   </SidebarMenuButton>
                   {n.key === "confirmation" && toConfirm > 0 && (
-                    <SidebarMenuBadge className="h-5 min-w-5 rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground tabular-nums peer-hover/menu-button:text-primary-foreground peer-data-active/menu-button:text-primary-foreground">
+                    <SidebarMenuBadge className="top-2! h-6 min-w-6 rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground tabular-nums peer-hover/menu-button:text-primary-foreground peer-data-active/menu-button:text-primary-foreground">
                       {toConfirm}
                     </SidebarMenuBadge>
                   )}
-                  {n.key === "rescue" && toRescue > 0 && (
-                    <SidebarMenuBadge className="h-5 min-w-5 rounded-full bg-destructive px-1.5 text-[11px] font-semibold text-white tabular-nums peer-hover/menu-button:text-white peer-data-active/menu-button:text-white">
+                  {n.key === "delivery" && toRescue > 0 && (
+                    <SidebarMenuBadge className="top-2! h-6 min-w-6 rounded-full bg-destructive px-1.5 text-xs font-semibold text-white tabular-nums peer-hover/menu-button:text-white peer-data-active/menu-button:text-white">
                       {toRescue}
                     </SidebarMenuBadge>
                   )}

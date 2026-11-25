@@ -48,7 +48,7 @@ export function KpiStrip({ items, className }: { items: Kpi[]; className?: strin
             >
               {k.value}
             </p>
-            {k.hint && <p className="mt-0.5 text-xs text-muted-foreground">{k.hint}</p>}
+            {k.hint && <p className="mt-0.5 text-sm text-muted-foreground">{k.hint}</p>}
           </div>
         ))}
       </div>

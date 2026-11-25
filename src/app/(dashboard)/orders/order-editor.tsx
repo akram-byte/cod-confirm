@@ -45,6 +45,7 @@ export type EditorInitial = {
 export function OrderEditor({
   orderId,
   cancelHref,
+  doneHref,
   products,
   wilayas,
   fees,
@@ -52,6 +53,8 @@ export function OrderEditor({
 }: {
   orderId: string | null;
   cancelHref: string;
+  /** Where to go after saving. Default: the order's page. */
+  doneHref?: string;
   products: EditorProduct[];
   wilayas: WilayaOption[];
   fees: Fees;
@@ -111,7 +114,7 @@ export function OrderEditor({
       setState(result);
       if (result.ok) {
         toast.success(result.number ? fill(t.orders.created, { number: `#${result.number}` }) : t.orders.updated);
-        router.push(`/orders/${result.id}`);
+        router.push(doneHref ?? `/orders/${result.id}`);
       } else if (result.error) {
         toast.error(result.error === "notFound" ? t.orders.notFound : t.common.error);
       }

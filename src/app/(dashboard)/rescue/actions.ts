@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireOwner } from "@/lib/auth";
+import { requireOwner, requireStaff } from "@/lib/auth";
 import { markFailed, recordRescue } from "@/lib/rescue";
 
 const schema = z.object({
@@ -12,7 +12,7 @@ const schema = z.object({
 });
 
 export async function saveRescue(input: z.input<typeof schema>) {
-  await requireOwner();
+  await requireStaff();
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { ok: false as const };
   try {

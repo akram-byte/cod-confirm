@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireOwner } from "@/lib/auth";
+import { requireStaff } from "@/lib/auth";
 import { logCall, type LogCallResult } from "@/lib/confirmation";
 
 const schema = z.object({
@@ -13,7 +13,7 @@ const schema = z.object({
 });
 
 export async function recordCall(input: z.input<typeof schema>): Promise<LogCallResult | { ok: false; error: "unknown" }> {
-  await requireOwner();
+  await requireStaff();
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "unknown" };
   const { orderId, outcome, note, callbackAt } = parsed.data;

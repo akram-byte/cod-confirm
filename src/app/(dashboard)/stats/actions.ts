@@ -8,23 +8,34 @@ import { db } from "@/lib/db";
 const schema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   amount: z.coerce.number().int().min(0).max(100_000_000),
+  productId: z.string().max(40),
 });
 
-/** One ad spend amount per day: saving a day again replaces it. 0 removes it. */
-export async function saveAdSpend(date: string, amount: string | number) {
+/**
+ * One ad spend amount per day, either general (productId "") or for one product's campaign.
+ * Saving the same day (and product) again replaces it. 0 removes it.
+ */
+export async function saveAdSpend(date: string, amount: string | number, productId = "") {
   await requireOwner();
-  const parsed = schema.safeParse({ date, amount });
+  const parsed = schema.safeParse({ date, amount, productId });
   if (!parsed.success) return { ok: false as const };
   const day = new Date(`${parsed.data.date}T00:00:00Z`);
   if (isNaN(day.getTime())) return { ok: false as const };
+  const { amount: value, productId: pid } = parsed.data;
   try {
-    if (parsed.data.amount === 0) await db.adSpend.deleteMany({ where: { date: day } });
-    else
-      await db.adSpend.upsert({
-        where: { date: day },
-        update: { amount: parsed.data.amount },
-        create: { date: day, amount: parsed.data.amount },
-      });
+    if (!pid) {
+      if (value === 0) await db.adSpend.deleteMany({ where: { date: day } });
+      else await db.adSpend.upsert({ where: { date: day }, update: { amount: value }, create: { date: day, amount: value } });
+    } else {
+      if (!(await db.product.findUnique({ where: { id: pid }, select: { id: true } }))) return { ok: false as const };
+      if (value === 0) await db.productAdSpend.deleteMany({ where: { date: day, productId: pid } });
+      else
+        await db.productAdSpend.upsert({
+          where: { date_productId: { date: day, productId: pid } },
+          update: { amount: value },
+          create: { date: day, productId: pid, amount: value },
+        });
+    }
     revalidatePath("/", "layout");
     return { ok: true as const };
   } catch (e) {

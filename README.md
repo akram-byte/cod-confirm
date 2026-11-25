@@ -27,8 +27,14 @@ One install = one seller. To sell it, deploy a separate copy (and a separate dat
 - **Courier (optional, Yalidine or ZR Express)**: send confirmed orders to the courier in one click (tracking number and
   label come back), choose the stop desk for desk orders, statuses refresh on their own and parcels move to
   Delivered / Returned by themselves. `COURIER=demo` runs a fake courier for development and demos.
+  **Settings → Courier → Check connection** tests the keys and every commune against the courier's own list
+  without sending anything.
 - **Stats**: confirmation, delivery and return rates, profit
-  (delivered sales − product cost − delivery fees − return costs − ad spend), daily ad spend entry, charts.
+  (delivered sales − product cost − delivery fees − return costs − ad spend), daily ad spend entry
+  (general or per product), charts, ad cost per delivered order per product, return report per wilaya.
+- **Caller login (optional)**: a second password for someone who calls customers for the seller. It only opens
+  the call queue, abandoned orders and "Save the parcel" (and adding a new order). No profit, stats, cash,
+  customers list or settings. Set or remove it in **Settings → Caller access**.
 - **Settings**: store name, products, delivery fees for all 69 wilayas, WhatsApp message, password.
 
 ## Tech
@@ -127,7 +133,11 @@ The evening summary runs from `vercel.json` (`0 20 * * *` = 21:00 Algiers). On a
 1. In the seller's Yalidine account: *Développement → API*, copy the **API ID** and **API Token**.
 2. In the server's environment set `COURIER=yalidine`, `YALIDINE_API_ID`, `YALIDINE_API_TOKEN` and
    `COURIER_FROM_WILAYA` (wilaya code the seller ships from, e.g. `16`).
-3. First live test: send **one** order, check it in the Yalidine dashboard (name, phone, commune, amount),
+3. **Settings → Courier → Check connection** (read-only, nothing is sent). It must say the keys are accepted,
+   show how many of the 1541 communes Yalidine knows, and list the ones it does not know (orders there would
+   be refused). Communes of the new 2026 wilayas that Yalidine still files under the old wilaya are found
+   by name and sent normally.
+4. First live test: send **one** order, check it in the Yalidine dashboard (name, phone, commune, amount),
    then delete that parcel there while it is still "En préparation".
 
 The amount sent is the order total, with `freeshipping` on, so the courier collects exactly what the
@@ -139,9 +149,11 @@ customer was told and takes its fee from the payout. Without `COURIER`, the deli
 1. In the seller's ZR Express space: *API / intégrations*, copy the **secret API key** and the **tenant id**.
    If the keys are refused, ask ZR Express to switch on API access for the account.
 2. In the server's environment set `COURIER=zrexpress`, `ZREXPRESS_API_KEY` and `ZREXPRESS_TENANT_ID`.
-3. First live test: send **one** order and check it in the ZR Express space (name, phone, commune, stop desk,
+3. **Settings → Courier → Check connection** (read-only, nothing is sent): keys accepted, communes found,
+   stop desks in the seller's wilaya. If it fails, the error message from ZR Express is shown.
+4. First live test: send **one** order and check it in the ZR Express space (name, phone, commune, stop desk,
    amount), then cancel it there. The endpoints follow an open-source SDK and have not yet been checked
-   against a real account, so do this test before the client ships for real.
+   against a real account, so do steps 3 and 4 before the client ships for real.
 
 Stop desks (ZR hubs) are picked on the delivery page. The amount collected is the order total.
 
@@ -161,8 +173,8 @@ Stop desks (ZR hubs) are picked on the delivery page. The amount collected is th
 
 Notes for the demo:
 - Keep `sslmode=verify-full` in both connection strings (as in `.env.example`).
-- The spam rate limit is in memory, so on Vercel (serverless) it is only best-effort.
-  Fine for a demo; use the VPS setup below for real clients.
+- Spam and login limits are kept in the database (`RateLimit` table), so they also hold on Vercel.
+  The daily cron clears old rows.
 - Delete the demo products/orders in the app before handing a copy to a client.
 
 > Vercel's free Hobby plan is for **non-commercial** use. For paying clients use a Vercel Pro plan
@@ -177,8 +189,7 @@ npm run build
 npm start          # port 3000; put Nginx or Caddy in front for HTTPS
 ```
 
-Keep it running with `pm2` or a systemd service. The spam rate limits are kept in memory,
-which works best on a single server like this.
+Keep it running with `pm2` or a systemd service.
 
 ### After each update
 
@@ -195,6 +206,7 @@ then redeploy.
 | `npm run db:migrate` | Create a new migration after changing `prisma/schema.prisma` (development) |
 | `npm run db:deploy` | Apply migrations to a database (production) |
 | `npm run db:seed` | First data (settings, fees, demo products/orders) |
+| `npm run db:demo-topup` | Demo database only: add a fresh batch of demo orders dated around today (last 13 days + today's queue, failed deliveries, abandoned orders, ad spend), so the dashboard looks alive for a video or a live demo. Adds only, never deletes. Refuses to run without the demo products. `-- --days=3` fills only the last 3 days. |
 | `npm run db:studio` | Browse the database |
 | `npm run reset-password` | Set the owner password back to `OWNER_PASSWORD` from `.env` (signs out every device) |
 

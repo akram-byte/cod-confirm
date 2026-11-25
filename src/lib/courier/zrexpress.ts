@@ -1,6 +1,7 @@
 import "server-only";
 import { toInternational } from "@/lib/phone";
 import { normName, type Courier, type CreateResult, type Desk, type ParcelState } from "./types";
+import { homeWilayaCode, makeMatcher } from "./match";
 
 /*
  * ZR Express API (https://api.zrexpress.app, docs at docs.zrexpress.app).
@@ -78,8 +79,9 @@ async function search<T>(path: string, filters: { field: string; operator: strin
 }
 
 // Reference lists change rarely: keep them for the life of the server process.
+// All communes come in one paged search, so matching needs no call per wilaya.
 let wilayasCache: Promise<Territory[]> | null = null;
-const communesCache = new Map<string, Promise<Territory[]>>();
+let communesCache: Promise<Territory[]> | null = null;
 
 function zWilayas() {
   wilayasCache ??= search<Territory>("/territories/search", [{ field: "level", operator: "eq", value: "wilaya" }], "code asc").catch((e) => {
@@ -89,32 +91,32 @@ function zWilayas() {
   return wilayasCache;
 }
 
-function zCommunes(wilayaId: string) {
-  let p = communesCache.get(wilayaId);
-  if (!p) {
-    p = search<Territory>(
-      "/territories/search",
-      [
-        { field: "level", operator: "eq", value: "commune" },
-        { field: "parentId", operator: "eq", value: wilayaId },
-      ],
-      "code asc",
-    )
-      // The filter is not documented: keep only this wilaya's communes in case it is ignored.
-      .then((list) => list.filter((c) => c.parentId === wilayaId))
-      .catch((e) => {
-        communesCache.delete(wilayaId);
-        throw e;
-      });
-    communesCache.set(wilayaId, p);
-  }
-  return p;
+function zCommunes() {
+  communesCache ??= search<Territory>("/territories/search", [{ field: "level", operator: "eq", value: "commune" }], "code asc").catch((e) => {
+    communesCache = null;
+    throw e;
+  });
+  return communesCache;
 }
 
-/** ZR's wilaya for one of ours: same code first, then same name. */
-async function matchWilaya(code: number, name: string) {
-  const list = await zWilayas();
-  return list.find((w) => w.code === code) ?? list.find((w) => normName(w.name) === normName(name));
+const match = makeMatcher<string, string>({
+  wilayas: async () => (await zWilayas()).map((w) => ({ id: w.id, code: w.code, name: w.name })),
+  // A commune's parent is its wilaya; anything without one is not a commune we can ship to.
+  communes: async () => (await zCommunes()).filter((c) => c.parentId).map((c) => ({ id: c.id, name: c.name, wilayaId: c.parentId! })),
+});
+
+async function desksIn(wilayaId: string): Promise<Desk[]> {
+  const hubs = await search<Hub>(
+    "/hubs/search",
+    [
+      { field: "isPickupPoint", operator: "eq", value: true },
+      { field: "address.cityTerritoryId", operator: "eq", value: wilayaId },
+    ],
+    "name asc",
+  );
+  return hubs
+    .filter((h) => h.isPickupPoint !== false && (!h.address?.cityTerritoryId || h.address.cityTerritoryId === wilayaId))
+    .map((h) => ({ id: h.id, name: h.name, address: [h.address?.street, h.address?.district].filter(Boolean).join(", ") }));
 }
 
 /** Final outcome from ZR's state name ("Delivered", "livre", "retour_expediteur"…). */
@@ -149,16 +151,15 @@ export const zrexpressCourier: Courier = {
       const sendable: typeof chunk = [];
       const body = [];
       for (const p of chunk) {
-        const w = await matchWilaya(p.wilayaCode, p.wilayaName);
-        const commune = w && (await zCommunes(w.id)).find((c) => normName(c.name) === normName(p.communeName));
-        if (!w || !commune) {
+        const place = await match.resolve(p.wilayaCode, p.wilayaName, p.communeName);
+        if (!place) {
           results.push({ orderId: p.orderId, ok: false, message: `Commune inconnue chez ZR Express: ${p.communeName}` });
           continue;
         }
         sendable.push(p);
         body.push({
           customer: { customerId: crypto.randomUUID(), name: `${p.firstname} ${p.familyname}`.trim(), phone: { number1: `+${toInternational(p.phone)}` } },
-          deliveryAddress: { street: p.address || p.communeName, cityTerritoryId: w.id, districtTerritoryId: commune.id },
+          deliveryAddress: { street: p.address || p.communeName, cityTerritoryId: place.wilaya.id, districtTerritoryId: place.commune.id },
           orderedProducts: [{ productName: p.products.slice(0, 250), quantity: 1, unitPrice: p.amount, stockType: "none" }],
           description: p.products.slice(0, 100),
           amount: p.amount,
@@ -220,18 +221,13 @@ export const zrexpressCourier: Courier = {
   },
 
   async getDesks(wilayaCode, wilayaName): Promise<Desk[]> {
-    const w = await matchWilaya(wilayaCode, wilayaName);
-    if (!w) return [];
-    const hubs = await search<Hub>(
-      "/hubs/search",
-      [
-        { field: "isPickupPoint", operator: "eq", value: true },
-        { field: "address.cityTerritoryId", operator: "eq", value: w.id },
-      ],
-      "name asc",
-    );
-    return hubs
-      .filter((h) => h.isPickupPoint !== false && (!h.address?.cityTerritoryId || h.address.cityTerritoryId === w.id))
-      .map((h) => ({ id: h.id, name: h.name, address: [h.address?.street, h.address?.district].filter(Boolean).join(", ") }));
+    const out: Desk[] = [];
+    for (const w of await match.wilayasFor(wilayaCode, wilayaName)) out.push(...(await desksIn(w.id)));
+    return out;
+  },
+
+  async check() {
+    const r = await match.check(async (w) => (await desksIn(w.id)).length, homeWilayaCode());
+    return { courier: "ZR Express", ...r };
   },
 };

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { sendDailySummary } from "@/lib/telegram";
 import { deleteOldDrafts } from "@/lib/drafts";
+import { cleanRateLimits } from "@/lib/rate-limit";
 
 // Evening summary on Telegram, plus daily cleanup. Vercel Cron calls this (see vercel.json) with
 // "Authorization: Bearer $CRON_SECRET". On a VPS, call it the same way from crontab.
@@ -11,6 +12,7 @@ export async function GET(req: NextRequest) {
   }
   // Abandoned order forms are customer data: delete them after 30 days.
   await deleteOldDrafts().catch((e) => console.error("delete old drafts failed", e));
+  await cleanRateLimits().catch((e) => console.error("clean rate limits failed", e));
   try {
     const sent = await sendDailySummary(req.nextUrl.origin);
     return NextResponse.json({ ok: true, sent });

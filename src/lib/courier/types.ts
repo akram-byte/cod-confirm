@@ -28,12 +28,26 @@ export type ParcelState = {
 
 export type Desk = { id: string; name: string; address: string };
 
+/** Result of the read-only connection check (Settings → Courier). Nothing is created at the courier. */
+export type CourierCheck = {
+  courier: string;
+  courierWilayas: number; // wilayas the courier knows
+  communes: number; // communes in our list
+  matched: number; // found at the courier
+  moved: number; // found under another wilaya (new 2026 wilayas the courier has not split yet)
+  missing: { wilaya: string; commune: string }[]; // orders there would be refused
+  homeWilaya: string; // COURIER_FROM_WILAYA (or Alger)
+  homeDesks: number | null; // stop desks the courier lists there (null = wilaya not found)
+};
+
 export interface Courier {
   name: CourierName;
   label: string; // shown on buttons: "Yalidine"
   createParcels(parcels: ParcelInput[]): Promise<CreateResult[]>;
   getStates(parcels: { tracking: string; sentAt: Date }[]): Promise<ParcelState[]>;
   getDesks(wilayaCode: number, wilayaName: string): Promise<Desk[]>;
+  /** Reads the courier's wilayas, communes and stop desks and compares them with ours. Read-only. */
+  check(): Promise<CourierCheck>;
 }
 
 /** Lowercase, no accents, letters and digits only: "Bordj El Kiffan" ≈ "bordj-el-kiffan". */

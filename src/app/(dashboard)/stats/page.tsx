@@ -12,6 +12,9 @@ import { fill } from "@/i18n/config";
 import { wilayaLabel, getWilaya } from "@/lib/algeria";
 import { BAD_RETURN_RATE, MIN_PARCELS, deskReturnRate, getWilayaReport, homeReturnRate, returnRate, suggestDeskOnly } from "@/lib/wilaya-report";
 import { AdSpendCard } from "./ad-spend";
+import { ProductCosts } from "./product-costs";
+import { getProductReport } from "@/lib/product-report";
+import { db } from "@/lib/db";
 import { WilayaReturns, type WilayaReturnRow } from "./wilaya-returns";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -21,7 +24,14 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
   const range = parseRange(await searchParams);
-  const [t, locale, s, report] = await Promise.all([getDictionary(), getLocale(), getStats(range), getWilayaReport(range)]);
+  const [t, locale, s, report, productReport, products] = await Promise.all([
+    getDictionary(),
+    getLocale(),
+    getStats(range),
+    getWilayaReport(range),
+    getProductReport(range),
+    db.product.findMany({ orderBy: [{ active: "desc" }, { name: "asc" }], select: { id: true, name: true } }),
+  ]);
   const wilayaRows: WilayaReturnRow[] = report.map((r) => {
     const w = getWilaya(r.wilayaCode);
     const rr = returnRate(r);
@@ -134,13 +144,15 @@ export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
             <AdSpendCard
               key={`${range.from}-${range.to}`}
               today={todayKey()}
-              entries={s.days
-                .filter((d) => d.adSpend > 0)
-                .map((d) => ({ day: d.day, amount: d.adSpend }))
-                .reverse()}
+              entries={s.adEntries}
+              products={products}
             />
           </div>
         </div>
+      </div>
+
+      <div className="mt-3">
+        <ProductCosts rows={productReport.rows} generalAds={productReport.generalAds} t={t} locale={locale} />
       </div>
 
       <div className="mt-3">

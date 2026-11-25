@@ -1,6 +1,7 @@
 import "server-only";
 import { getWilaya } from "@/lib/algeria";
 import { normName, type Courier, type CreateResult, type Desk, type ParcelState } from "./types";
+import { homeWilayaCode, makeMatcher } from "./match";
 
 /*
  * Yalidine API v1 (https://api.yalidine.app/v1), keys from yalidine.app → Développement.
@@ -48,8 +49,9 @@ async function all<T>(path: string, params: Record<string, string | number>): Pr
 }
 
 // Reference lists change rarely: keep them for the life of the server process.
+// All communes come in one paged call (about 1,500 rows), so matching needs no call per wilaya.
 let wilayasCache: Promise<YWilaya[]> | null = null;
-const communesCache = new Map<number, Promise<YCommune[]>>();
+let communesCache: Promise<YCommune[]> | null = null;
 
 function yWilayas() {
   wilayasCache ??= all<YWilaya>("/wilayas/", {}).catch((e) => {
@@ -59,22 +61,22 @@ function yWilayas() {
   return wilayasCache;
 }
 
-function yCommunes(wilayaId: number) {
-  let p = communesCache.get(wilayaId);
-  if (!p) {
-    p = all<YCommune>("/communes/", { wilaya_id: wilayaId }).catch((e) => {
-      communesCache.delete(wilayaId);
-      throw e;
-    });
-    communesCache.set(wilayaId, p);
-  }
-  return p;
+function yCommunes() {
+  communesCache ??= all<YCommune>("/communes/", {}).catch((e) => {
+    communesCache = null;
+    throw e;
+  });
+  return communesCache;
 }
 
-/** Yalidine's wilaya for one of ours: same code first, then same name. */
-async function matchWilaya(code: number, name: string) {
-  const list = await yWilayas();
-  return list.find((w) => w.id === code && normName(w.name) === normName(name)) ?? list.find((w) => normName(w.name) === normName(name)) ?? list.find((w) => w.id === code);
+const match = makeMatcher<number, number>({
+  wilayas: yWilayas,
+  communes: async () => (await yCommunes()).map((c) => ({ id: c.id, name: c.name, wilayaId: c.wilaya_id })),
+});
+
+async function desksIn(wilayaId: number): Promise<Desk[]> {
+  const centers = await all<YCenter>("/centers/", { wilaya_id: wilayaId });
+  return centers.map((c) => ({ id: String(c.center_id), name: c.name, address: c.address }));
 }
 
 const DELIVERED = new Set(["livre"]);
@@ -88,16 +90,20 @@ export const yalidineCourier: Courier = {
     const fromCode = Number(process.env.COURIER_FROM_WILAYA);
     const from = getWilaya(fromCode);
     if (!from) throw new Error("COURIER_FROM_WILAYA is not set to a wilaya code");
-    const fromY = await matchWilaya(from.code, from.nameFr);
+    const fromY = await match.wilayaFor(from.code, from.nameFr);
 
     const results: CreateResult[] = [];
     for (let i = 0; i < parcels.length; i += CHUNK) {
       const chunk = parcels.slice(i, i + CHUNK);
       const body = [];
+      const sendable: typeof chunk = [];
       for (const p of chunk) {
-        const w = await matchWilaya(p.wilayaCode, p.wilayaName);
-        const communes = w ? await yCommunes(w.id) : [];
-        const commune = communes.find((c) => normName(c.name) === normName(p.communeName));
+        const place = await match.resolve(p.wilayaCode, p.wilayaName, p.communeName);
+        if (!place) {
+          results.push({ orderId: p.orderId, ok: false, message: `Commune inconnue chez Yalidine: ${p.communeName}` });
+          continue;
+        }
+        sendable.push(p);
         body.push({
           order_id: p.orderId,
           from_wilaya_name: fromY?.name ?? from.nameFr,
@@ -105,8 +111,8 @@ export const yalidineCourier: Courier = {
           familyname: p.familyname,
           contact_phone: p.phone,
           address: p.address || p.communeName,
-          to_commune_name: commune?.name ?? p.communeName,
-          to_wilaya_name: w?.name ?? p.wilayaName,
+          to_commune_name: place.commune.name,
+          to_wilaya_name: place.wilaya.name,
           product_list: p.products,
           price: p.amount,
           do_insurance: false,
@@ -121,9 +127,10 @@ export const yalidineCourier: Courier = {
           has_exchange: false,
         });
       }
+      if (sendable.length === 0) continue;
       try {
         const res = await call<YCreate>("/parcels/", { method: "POST", body: JSON.stringify(body) });
-        for (const p of chunk) {
+        for (const p of sendable) {
           const r = res[p.orderId];
           results.push(
             r?.success && r.tracking
@@ -133,7 +140,7 @@ export const yalidineCourier: Courier = {
         }
       } catch (e) {
         const message = e instanceof Error ? e.message : "Yalidine error";
-        for (const p of chunk) results.push({ orderId: p.orderId, ok: false, message });
+        for (const p of sendable) results.push({ orderId: p.orderId, ok: false, message });
       }
     }
     return results;
@@ -157,9 +164,13 @@ export const yalidineCourier: Courier = {
   },
 
   async getDesks(wilayaCode, wilayaName): Promise<Desk[]> {
-    const w = await matchWilaya(wilayaCode, wilayaName);
-    if (!w) return [];
-    const centers = await all<YCenter>("/centers/", { wilaya_id: w.id });
-    return centers.map((c) => ({ id: String(c.center_id), name: c.name, address: c.address }));
+    const out: Desk[] = [];
+    for (const w of await match.wilayasFor(wilayaCode, wilayaName)) out.push(...(await desksIn(w.id)));
+    return out;
+  },
+
+  async check() {
+    const r = await match.check(async (w) => (await desksIn(w.id)).length, homeWilayaCode());
+    return { courier: "Yalidine", ...r };
   },
 };

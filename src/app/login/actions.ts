@@ -1,31 +1,17 @@
 "use server";
 
 import bcrypt from "bcryptjs";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { createSession, deleteSession } from "@/lib/auth";
+import { createSession, deleteSession, type Role } from "@/lib/auth";
+import { clearLimit, clientIp, isLimited, record } from "@/lib/rate-limit";
 
 export type LoginState = { error?: "required" | "invalid" | "tooMany" | "notSetUp" | "unknown" };
 
-// Simple in-memory limit: 5 wrong passwords per IP per 10 minutes.
-// Good enough for a single-owner app on one server.
-const attempts = new Map<string, { count: number; first: number }>();
+// 5 wrong passwords per IP per 10 minutes. Kept in the database, so it also holds on Vercel.
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_ATTEMPTS = 5;
-
-function tooMany(ip: string) {
-  const a = attempts.get(ip);
-  if (!a || Date.now() - a.first > WINDOW_MS) return false;
-  return a.count >= MAX_ATTEMPTS;
-}
-
-function recordFailure(ip: string) {
-  const a = attempts.get(ip);
-  if (!a || Date.now() - a.first > WINDOW_MS) attempts.set(ip, { count: 1, first: Date.now() });
-  else a.count++;
-}
 
 const schema = z.object({ password: z.string().min(1).max(200) });
 
@@ -33,29 +19,30 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
   const parsed = schema.safeParse({ password: formData.get("password") });
   if (!parsed.success) return { error: "required" };
 
-  const h = await headers();
-  const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "local";
-  if (tooMany(ip)) return { error: "tooMany" };
+  const key = `login:${await clientIp()}`;
+  if (await isLimited(key, MAX_ATTEMPTS)) return { error: "tooMany" };
 
-  let ok = false;
+  let role: Role | null = null;
   try {
-    const settings = await db.settings.findUnique({ where: { id: 1 }, select: { passwordHash: true } });
+    const settings = await db.settings.findUnique({ where: { id: 1 }, select: { passwordHash: true, callerPasswordHash: true } });
     if (!settings) return { error: "notSetUp" };
-    ok = await bcrypt.compare(parsed.data.password, settings.passwordHash);
-    if (ok) {
-      attempts.delete(ip);
-      await createSession(settings.passwordHash);
+    // One password field for both logins: the owner's password, or the caller's when one is set.
+    if (await bcrypt.compare(parsed.data.password, settings.passwordHash)) role = "owner";
+    else if (settings.callerPasswordHash && (await bcrypt.compare(parsed.data.password, settings.callerPasswordHash))) role = "caller";
+    if (role) {
+      await clearLimit(key);
+      await createSession(role === "owner" ? settings.passwordHash : settings.callerPasswordHash, role);
     }
   } catch (e) {
     console.error("login failed", e);
     return { error: "unknown" };
   }
 
-  if (!ok) {
-    recordFailure(ip);
+  if (!role) {
+    await record(key, WINDOW_MS);
     return { error: "invalid" };
   }
-  redirect("/");
+  redirect(role === "owner" ? "/" : "/confirmation");
 }
 
 export async function logout() {

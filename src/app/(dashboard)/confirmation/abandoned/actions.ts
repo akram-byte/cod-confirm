@@ -2,13 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireOwner } from "@/lib/auth";
+import { requireStaff } from "@/lib/auth";
 import { markDraft } from "@/lib/drafts";
 
 const schema = z.object({ id: z.string().min(1), result: z.enum(["NO_ANSWER", "DISMISSED"]) });
 
 export async function saveDraftResult(input: z.input<typeof schema>) {
-  await requireOwner();
+  await requireStaff();
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { ok: false };
   try {

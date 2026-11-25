@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { ShoppingCart } from "lucide-react";
-import { BackLink } from "@/components/back-link";
 import { EmptyState } from "@/components/empty-state";
 import { PageIntro } from "@/components/page-intro";
 import { db } from "@/lib/db";
@@ -59,7 +58,6 @@ export default async function AbandonedPage() {
 
   return (
     <>
-      <BackLink href="/confirmation" label={t.pages.confirmation.title} />
       <PageIntro
         title={t.abandoned.title}
         description={rows.length > 0 ? fill(t.abandoned.count, { count: rows.length, value: formatDZD(value, locale) }) : t.abandoned.description}

@@ -13,6 +13,7 @@
     "db:seed": "prisma db seed",
     "db:seed-client": "tsx prisma/seed.ts --client",
     "db:reset-demo": "tsx prisma/seed.ts --reset-demo",
+    "db:demo-topup": "tsx prisma/demo-topup.ts",
     "db:studio": "prisma studio",
     "reset-password": "tsx prisma/reset-password.ts",
     "postinstall": "prisma generate"

@@ -35,17 +35,17 @@ export type RescueRow = {
 
 type Result = "WILL_RECEIVE" | "NO_ANSWER" | "REFUSED";
 
-export function RescueList({ rows }: { rows: RescueRow[] }) {
+export function RescueList({ rows, caller = false }: { rows: RescueRow[]; caller?: boolean }) {
   return (
     <ul className="grid gap-3 lg:grid-cols-2">
       {rows.map((r) => (
-        <RescueCard key={r.id} row={r} />
+        <RescueCard key={r.id} row={r} caller={caller} />
       ))}
     </ul>
   );
 }
 
-function RescueCard({ row }: { row: RescueRow }) {
+function RescueCard({ row, caller }: { row: RescueRow; caller: boolean }) {
   const { t, locale } = useI18n();
   const router = useRouter();
   const [note, setNote] = useState("");
@@ -84,13 +84,15 @@ function RescueCard({ row }: { row: RescueRow }) {
             {row.noAnswer > 0 && <span>· {fill(t.rescue.noAnswerTimes, { count: row.noAnswer })}</span>}
           </p>
         </div>
-        <Link
-          href={`/orders/${row.id}`}
-          className="inline-flex shrink-0 items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ExternalLink className="size-4" />
-          {t.confirm.open}
-        </Link>
+        {!caller && (
+          <Link
+            href={`/orders/${row.id}`}
+            className="inline-flex shrink-0 items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <ExternalLink className="size-4" />
+            {t.confirm.open}
+          </Link>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-4">

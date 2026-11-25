@@ -51,16 +51,18 @@ export async function saveDeliveryFees(rows: z.input<typeof feeRow>[]) {
   }
 }
 
-export type PasswordState = { ok: boolean; error?: "current" | "short" | "mismatch" | "tooMany" | "unknown" };
+export type PasswordState = { ok: boolean; error?: "current" | "short" | "mismatch" | "tooMany" | "unknown" | "sameAsCaller" };
 
 export async function changePassword(current: string, next: string, confirm: string): Promise<PasswordState> {
   await requireOwner();
   if (next.length < 8 || next.length > 200) return { ok: false, error: "short" };
   if (next !== confirm) return { ok: false, error: "mismatch" };
-  if (hit(`password:${await clientIp()}`, 5, 10 * 60 * 1000)) return { ok: false, error: "tooMany" };
+  if (await hit(`password:${await clientIp()}`, 5, 10 * 60 * 1000)) return { ok: false, error: "tooMany" };
   try {
-    const settings = await db.settings.findUniqueOrThrow({ where: { id: 1 }, select: { passwordHash: true } });
+    const settings = await db.settings.findUniqueOrThrow({ where: { id: 1 }, select: { passwordHash: true, callerPasswordHash: true } });
     if (!(await bcrypt.compare(current, settings.passwordHash))) return { ok: false, error: "current" };
+    // Both logins share one password field: the same password would open the owner's account.
+    if (settings.callerPasswordHash && (await bcrypt.compare(next, settings.callerPasswordHash))) return { ok: false, error: "sameAsCaller" };
     const passwordHash = await bcrypt.hash(next, 12);
     await db.settings.update({ where: { id: 1 }, data: { passwordHash } });
     // Other devices are signed out (their session points at the old password); keep this one signed in.
@@ -68,6 +70,37 @@ export async function changePassword(current: string, next: string, confirm: str
     return { ok: true };
   } catch (e) {
     console.error("change password failed", e);
+    return { ok: false, error: "unknown" };
+  }
+}
+
+export type CallerState = { ok: boolean; error?: "short" | "sameAsOwner" | "unknown" };
+
+/** Sets (or changes) the caller login's password. Changing it signs the caller out everywhere. */
+export async function setCallerPassword(password: string): Promise<CallerState> {
+  await requireOwner();
+  if (password.length < 8 || password.length > 200) return { ok: false, error: "short" };
+  try {
+    const settings = await db.settings.findUniqueOrThrow({ where: { id: 1 }, select: { passwordHash: true } });
+    if (await bcrypt.compare(password, settings.passwordHash)) return { ok: false, error: "sameAsOwner" };
+    await db.settings.update({ where: { id: 1 }, data: { callerPasswordHash: await bcrypt.hash(password, 12) } });
+    revalidatePath("/settings");
+    return { ok: true };
+  } catch (e) {
+    console.error("set caller password failed", e);
+    return { ok: false, error: "unknown" };
+  }
+}
+
+/** Turns the caller login off; its sessions stop working at once. */
+export async function removeCallerPassword(): Promise<CallerState> {
+  await requireOwner();
+  try {
+    await db.settings.update({ where: { id: 1 }, data: { callerPasswordHash: "" } });
+    revalidatePath("/settings");
+    return { ok: true };
+  } catch (e) {
+    console.error("remove caller password failed", e);
     return { ok: false, error: "unknown" };
   }
 }

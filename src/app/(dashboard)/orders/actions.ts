@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireOwner } from "@/lib/auth";
+import { requireOwner, requireStaff } from "@/lib/auth";
 import {
   ORDER_STATUSES,
   createOrder,
@@ -36,7 +36,8 @@ function parse(formData: FormData) {
 
 /** Create (id = null) or update an order from the dashboard. */
 export async function saveOrder(id: string | null, formData: FormData, force: boolean): Promise<SaveOrderState> {
-  await requireOwner();
+  // The caller login may add a new order (e.g. from an abandoned form), never edit one.
+  if ((await requireStaff()) !== "owner" && id) return { ok: false, error: "notFound" };
   const parsed = parse(formData);
   const fee = feeSchema.safeParse(formData.get("deliveryFee"));
   if (!parsed.success || !fee.success) {

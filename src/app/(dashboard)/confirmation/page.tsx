@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarClock, PartyPopper, ShoppingCart } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
-import { getAbandoned } from "@/lib/drafts";
+import { CalendarClock, PartyPopper } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { PageIntro } from "@/components/page-intro";
 import { db } from "@/lib/db";
+import { getRole } from "@/lib/auth";
 import { getQueue, whatsappUrl, type QueueItem } from "@/lib/confirmation";
 import { formatDZD } from "@/lib/money";
 import { formatDateTime } from "@/lib/format";
@@ -41,21 +40,15 @@ function toRow(o: QueueItem, locale: Locale, risk: QueueRow["risk"]): QueueRow {
 export default async function ConfirmationPage({ searchParams }: PageProps<"/confirmation">) {
   const sp = await searchParams;
   const requested = typeof sp.id === "string" ? sp.id : "";
-  const [t, locale, { queue, upcoming }, settings, abandoned] = await Promise.all([
+  const [t, locale, { queue, upcoming }, settings, role] = await Promise.all([
     getDictionary(),
     getLocale(),
     getQueue(),
     db.settings.findUnique({ where: { id: 1 }, select: { storeName: true, whatsappTemplate: true } }),
-    getAbandoned(),
+    getRole(),
   ]);
+  const caller = role === "caller";
 
-  const abandonedLink = (
-    <Link href="/confirmation/abandoned" className={buttonVariants({ variant: "outline", size: "sm" })}>
-      <ShoppingCart className="size-4" />
-      {t.abandoned.title}
-      {abandoned.length > 0 && <span className="tabular-nums text-muted-foreground">{abandoned.length}</span>}
-    </Link>
-  );
 
   const upcomingList = upcoming.length > 0 && (
     <section className="mt-6">
@@ -66,12 +59,23 @@ export default async function ConfirmationPage({ searchParams }: PageProps<"/con
       <ul className="divide-y rounded-xl border bg-card text-sm">
         {upcoming.map((o) => (
           <li key={o.id}>
-            <Link href={`/orders/${o.id}`} className="flex items-center justify-between gap-3 p-3 hover:bg-muted/50">
-              <span className="min-w-0 truncate">
-                <bdi>#{o.number}</bdi> · <bdi>{o.customerName}</bdi>
-              </span>
-              <span className="shrink-0 text-muted-foreground tabular-nums">{formatDateTime(o.callbackAt!, locale)}</span>
-            </Link>
+            {(() => {
+              const inner = (
+                <>
+                  <span className="min-w-0 truncate">
+                    <bdi>#{o.number}</bdi> · <bdi>{o.customerName}</bdi>
+                  </span>
+                  <span className="shrink-0 text-muted-foreground tabular-nums">{formatDateTime(o.callbackAt!, locale)}</span>
+                </>
+              );
+              return caller ? (
+                <div className="flex items-center justify-between gap-3 p-3">{inner}</div>
+              ) : (
+                <Link href={`/orders/${o.id}`} className="flex items-center justify-between gap-3 p-3 hover:bg-muted/50">
+                  {inner}
+                </Link>
+              );
+            })()}
           </li>
         ))}
       </ul>
@@ -81,9 +85,7 @@ export default async function ConfirmationPage({ searchParams }: PageProps<"/con
   if (queue.length === 0) {
     return (
       <>
-        <PageIntro title={t.pages.confirmation.title} description={t.pages.confirmation.description}>
-          {abandonedLink}
-        </PageIntro>
+        <PageIntro title={t.pages.confirmation.title} description={t.pages.confirmation.description} />
         <EmptyState icon={PartyPopper} title={t.confirm.emptyTitle} description={t.confirm.emptyText} />
         {upcomingList}
       </>
@@ -146,10 +148,8 @@ export default async function ConfirmationPage({ searchParams }: PageProps<"/con
 
   return (
     <>
-      <PageIntro title={t.pages.confirmation.title} description={fill(t.confirm.queueCount, { count: queue.length })}>
-        {abandonedLink}
-      </PageIntro>
-      <ConfirmationWorkspace current={current} queue={queue.map((o) => toRow(o, locale, risks.get(o.customerId)))} nextId={nextId} />
+      <PageIntro title={t.pages.confirmation.title} description={fill(t.confirm.queueCount, { count: queue.length })} />
+      <ConfirmationWorkspace current={current} queue={queue.map((o) => toRow(o, locale, risks.get(o.customerId)))} nextId={nextId} caller={caller} />
       {upcomingList}
     </>
   );

@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Marketing video (Remotion), its own package with its own tooling.
+    "video/**",
   ]),
 ]);
 

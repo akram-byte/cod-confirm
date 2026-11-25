@@ -1,5 +1,7 @@
 import "server-only";
+import { WILAYAS } from "@/lib/algeria";
 import type { Courier, ParcelState } from "./types";
+import { homeWilayaCode } from "./match";
 
 /*
  * Demo courier: behaves like a real one without any account, for development and
@@ -52,5 +54,20 @@ export const demoCourier: Courier = {
       { id: String(wilayaCode * 100 + 1), name: `${wilayaName} Centre`, address: "Agence principale" },
       { id: String(wilayaCode * 100 + 2), name: `${wilayaName} Nord`, address: "Point relais" },
     ];
+  },
+
+  async check() {
+    const communes = WILAYAS.reduce((n, w) => n + w.communes.length, 0);
+    const home = WILAYAS.find((w) => w.code === homeWilayaCode());
+    return {
+      courier: "Démo",
+      courierWilayas: WILAYAS.length,
+      communes,
+      matched: communes,
+      moved: 0,
+      missing: [],
+      homeWilaya: home ? `${String(home.code).padStart(2, "0")} ${home.nameFr}` : "",
+      homeDesks: 2,
+    };
   },
 };

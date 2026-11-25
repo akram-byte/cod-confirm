@@ -80,6 +80,8 @@ export type Stats = {
   adSpend: number;
   profit: number;
   days: DayPoint[];
+  /** Every ad spend entry in the range: productId "" = not tied to a product. */
+  adEntries: { day: string; productId: string; amount: number }[];
 };
 
 const rate = (a: number, b: number) => (b > 0 ? a / b : null);
@@ -88,7 +90,8 @@ export async function getStats(range: Pick<DateRange, "from" | "to">): Promise<S
   const start = startOfDay(range.from)!;
   const end = new Date(startOfDay(range.to)!.getTime() + DAY_MS);
 
-  const [orders, ads] = await Promise.all([
+  const adWhere = { date: { gte: new Date(`${range.from}T00:00:00Z`), lte: new Date(`${range.to}T00:00:00Z`) } };
+  const [orders, ads, productAds] = await Promise.all([
     db.order.findMany({
       where: { createdAt: { gte: start, lt: end } },
       select: {
@@ -101,10 +104,9 @@ export async function getStats(range: Pick<DateRange, "from" | "to">): Promise<S
       },
     }),
     // AdSpend.date is a calendar day stored at UTC midnight.
-    db.adSpend.findMany({
-      where: { date: { gte: new Date(`${range.from}T00:00:00Z`), lte: new Date(`${range.to}T00:00:00Z`) } },
-      select: { date: true, amount: true },
-    }),
+    db.adSpend.findMany({ where: adWhere, select: { date: true, amount: true } }),
+    // Spend for one product's campaign, on top of the general ad spend.
+    db.productAdSpend.findMany({ where: adWhere, select: { date: true, amount: true, productId: true } }),
   ]);
 
   const days = new Map<string, DayPoint>();
@@ -130,6 +132,7 @@ export async function getStats(range: Pick<DateRange, "from" | "to">): Promise<S
     adSpend: 0,
     profit: 0,
     days: [],
+    adEntries: [],
   };
 
   for (const o of orders) {
@@ -171,7 +174,8 @@ export async function getStats(range: Pick<DateRange, "from" | "to">): Promise<S
     }
   }
 
-  for (const a of ads) {
+  for (const a of [...ads.map((a) => ({ ...a, productId: "" })), ...productAds]) {
+    s.adEntries.push({ day: a.date.toISOString().slice(0, 10), productId: a.productId, amount: a.amount });
     s.adSpend += a.amount;
     const d = days.get(a.date.toISOString().slice(0, 10));
     if (d) {
@@ -185,5 +189,6 @@ export async function getStats(range: Pick<DateRange, "from" | "to">): Promise<S
   s.returnRate = rate(s.returned, s.delivered + s.returned);
   s.profit = s.sales - s.productCost - s.deliveryFees - s.returnCosts - s.adSpend;
   s.days = [...days.values()];
+  s.adEntries.sort((a, b) => (a.day === b.day ? a.productId.localeCompare(b.productId) : a.day < b.day ? 1 : -1));
   return s;
 }

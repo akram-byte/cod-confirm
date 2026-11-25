@@ -10,7 +10,9 @@ import { AutoReplySection } from "./auto-reply-section";
 import { PixelsSection } from "./pixels-section";
 import { TelegramSection } from "./telegram-section";
 import { telegramEnabled } from "@/lib/telegram";
-import { DeliveryFeesSection, PasswordSection, StoreNameSection } from "./store-sections";
+import { getCourier } from "@/lib/courier";
+import { CourierSection } from "./courier-section";
+import { CallerSection, DeliveryFeesSection, PasswordSection, StoreNameSection } from "./store-sections";
 import { WILAYAS, wilayaLabel } from "@/lib/algeria";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -23,7 +25,7 @@ export default async function SettingsPage() {
     getDictionary(),
     getLocale(),
     headers(),
-    db.settings.findUnique({ where: { id: 1 }, select: { storeName: true, whatsappTemplate: true, fbPixelId: true, tiktokPixelId: true, telegramChatId: true, telegramDaily: true } }),
+    db.settings.findUnique({ where: { id: 1 }, select: { storeName: true, whatsappTemplate: true, fbPixelId: true, tiktokPixelId: true, telegramChatId: true, telegramDaily: true, callerPasswordHash: true } }),
     db.product.findMany({
       orderBy: [{ active: "desc" }, { createdAt: "asc" }],
       include: { _count: { select: { items: true } } },
@@ -60,6 +62,7 @@ export default async function SettingsPage() {
           }}
         />
         <TelegramSection enabled={telegramEnabled()} connected={!!settings?.telegramChatId} daily={settings?.telegramDaily ?? true} />
+        {getCourier() && <CourierSection label={getCourier()!.label} />}
         <PixelsSection fb={settings?.fbPixelId ?? ""} tiktok={settings?.tiktokPixelId ?? ""} />
         <DeliveryFeesSection
           rows={WILAYAS.map((w) => {
@@ -74,6 +77,7 @@ export default async function SettingsPage() {
           })}
         />
         <PasswordSection />
+        <CallerSection enabled={!!settings?.callerPasswordHash} />
       </div>
     </>
   );

@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { KeyRound, Loader2, Search, Store, Truck } from "lucide-react";
+import { Headset, KeyRound, Loader2, Search, Store, Truck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,15 @@ import { Field } from "@/components/field";
 import { useI18n } from "@/i18n/client";
 import { fill } from "@/i18n/config";
 import { cn } from "@/lib/utils";
-import { changePassword, saveDeliveryFees, saveStoreName, type PasswordState } from "./store-actions";
+import {
+  changePassword,
+  removeCallerPassword,
+  saveDeliveryFees,
+  saveStoreName,
+  setCallerPassword,
+  type CallerState,
+  type PasswordState,
+} from "./store-actions";
 
 export function StoreNameSection({ name }: { name: string }) {
   const { t } = useI18n();
@@ -248,6 +256,80 @@ export function PasswordSection() {
             {pending && <Loader2 className="size-4 animate-spin" />}
             {t.passwordSettings.submit}
           </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+/** Optional second login for someone who only calls customers. */
+export function CallerSection({ enabled }: { enabled: boolean }) {
+  const { t } = useI18n();
+  const router = useRouter();
+  const [password, setPassword] = useState("");
+  const [state, setState] = useState<CallerState | null>(null);
+  const [pending, startTransition] = useTransition();
+  const error = state?.error ? t.callerSettings.errors[state.error] : null;
+
+  function run(action: () => Promise<CallerState>, done: string) {
+    startTransition(async () => {
+      const res = await action().catch((): CallerState => ({ ok: false, error: "unknown" }));
+      setState(res);
+      if (res.ok) {
+        toast.success(done);
+        setPassword("");
+        router.refresh();
+      }
+    });
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Headset className="size-4" />
+          {t.callerSettings.title}
+        </CardTitle>
+        <CardDescription>{t.callerSettings.description}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className={cn("text-sm font-medium", enabled ? "text-foreground" : "text-muted-foreground")}>
+          {enabled ? t.callerSettings.on : t.callerSettings.off}
+        </p>
+        <form
+          className="grid gap-3 sm:max-w-sm"
+          onSubmit={(e) => {
+            e.preventDefault();
+            run(() => setCallerPassword(password), t.callerSettings.saved);
+          }}
+        >
+          <Field id="caller-pw" label={t.callerSettings.password} hint={t.callerSettings.errors.short}>
+            <Input
+              id="caller-pw"
+              type="password"
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              minLength={8}
+              required
+            />
+          </Field>
+          {error && (
+            <p role="alert" className="text-sm text-destructive">
+              {error}
+            </p>
+          )}
+          <div className="flex flex-wrap gap-2">
+            <Button type="submit" disabled={pending || password.length < 8} className="w-fit">
+              {pending && <Loader2 className="size-4 animate-spin" />}
+              {enabled ? t.callerSettings.change : t.callerSettings.save}
+            </Button>
+            {enabled && (
+              <Button type="button" variant="outline" disabled={pending} onClick={() => run(removeCallerPassword, t.callerSettings.removed)}>
+                {t.callerSettings.remove}
+              </Button>
+            )}
+          </div>
         </form>
       </CardContent>
     </Card>

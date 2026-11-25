@@ -58,6 +58,7 @@ model Settings {
   telegramCode     String    @default("") // one-time code while connecting
   telegramLocale   String    @default("ar") // language of the alerts
   telegramDaily    Boolean   @default(true) // evening summary
+  callerPasswordHash String  @default("") // optional second login for someone who only calls customers ("" = off)
   updatedAt        DateTime @updatedAt
 }
 
@@ -73,6 +74,7 @@ model Product {
   updatedAt   DateTime    @updatedAt
   items       OrderItem[]
   drafts      OrderDraft[]
+  adSpends    ProductAdSpend[]
 }
 
 model Customer {
@@ -190,6 +192,31 @@ model AdSpend {
   note      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+/// Ad spend for one product on one day (a campaign for that product). Counted on top of
+/// AdSpend (spend not tied to a product). Used for cost per delivered order per product.
+model ProductAdSpend {
+  id        String   @id @default(cuid())
+  date      DateTime @db.Date
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  amount    Int // DZD
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([date, productId])
+  @@index([productId])
+}
+
+/// Spam and login limits, kept in the database so they hold on serverless hosting too.
+/// One row per key (e.g. "order:1.2.3.4"); expired rows are reused or cleaned by the daily cron.
+model RateLimit {
+  key     String   @id
+  count   Int
+  resetAt DateTime
+
+  @@index([resetAt])
 }
 
 /// Money the courier paid to the seller, for a set of delivered (and returned) parcels.

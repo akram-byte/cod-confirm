@@ -1,0 +1,26 @@
+{
+  "name": "confirmi-video",
+  "private": true,
+  "scripts": {
+    "capture": "node capture/capture.mjs",
+    "studio": "remotion studio src/index.ts",
+    "render:ad": "remotion render src/index.ts Ad30 out/confirmi-ad-30s.mp4",
+    "render:demo": "remotion render src/index.ts Demo60 out/confirmi-demo-60s.mp4",
+    "voice": "node capture/voice.mjs",
+    "still": "remotion still src/index.ts",
+    "tts": "node capture/tts.mjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.547",
+    "@remotion/google-fonts": "^4.0.547",
+    "@remotion/media-utils": "^4.0.547",
+    "playwright-core": "^1.65.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remotion": "^4.0.547"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.1",
+    "typescript": "^7.0.2"
+  }
+}

@@ -35,7 +35,7 @@ export async function submitPublicOrder(formData: FormData): Promise<PublicOrder
   });
   if (!parsed.success) return { ok: false, errors: fieldErrors(parsed.error) };
 
-  if (hit(`order:${await clientIp()}`, MAX_ORDERS, WINDOW_MS)) return { ok: false, error: "tooMany" };
+  if (await hit(`order:${await clientIp()}`, MAX_ORDERS, WINDOW_MS)) return { ok: false, error: "tooMany" };
 
   try {
     const fill = Number(formData.get("fillMs"));
@@ -79,7 +79,7 @@ export async function savePublicDraft(input: z.input<typeof draftSchema>): Promi
   const phone = normalizePhone(parsed.data.phone);
   if (!phone) return;
   // A form visit saves a few times while typing; 30 saves per device every 15 minutes is plenty.
-  if (hit(`draft:${await clientIp()}`, 30, WINDOW_MS)) return;
+  if (await hit(`draft:${await clientIp()}`, 30, WINDOW_MS)) return;
   try {
     await saveDraft({ ...parsed.data, phone, customerName: parsed.data.customerName || null });
   } catch (e) {

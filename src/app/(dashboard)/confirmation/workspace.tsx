@@ -64,17 +64,20 @@ export function ConfirmationWorkspace({
   current,
   queue,
   nextId,
+  caller = false,
 }: {
   current: CurrentOrder;
   queue: QueueRow[];
   nextId: string | null;
+  /** The caller login: no link to the full order page (owner only). */
+  caller?: boolean;
 }) {
   const { t } = useI18n();
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       <div className="lg:col-span-2">
         {/* key: fresh note + dialog state for every order */}
-        <CallCard key={current.id} order={current} nextId={nextId} />
+        <CallCard key={current.id} order={current} nextId={nextId} caller={caller} />
       </div>
       <aside>
         <h2 className="mb-2 text-sm font-medium text-muted-foreground">{t.confirm.queueTitle}</h2>
@@ -92,7 +95,7 @@ export function ConfirmationWorkspace({
                   </span>
                   <StatusBadge status={o.status} label={t.status[o.status]} className="h-5 px-2" />
                 </div>
-                <div className="mt-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                <div className="mt-1 flex items-center justify-between gap-2 text-sm text-muted-foreground">
                   <span className="flex min-w-0 items-center gap-1.5">
                     <span className="truncate">{o.wilaya}</span>
                     <RiskBadge risk={o.risk} labels={t.risk} />
@@ -121,7 +124,7 @@ const OUTCOME_STYLE: Record<CallOutcome, string> = {
 const OUTCOME_ICON = { CONFIRMED: Check, NO_ANSWER: PhoneMissed, CALLBACK: CalendarClock, CANCELLED: X };
 const OUTCOMES: CallOutcome[] = ["CONFIRMED", "NO_ANSWER", "CALLBACK", "CANCELLED"];
 
-function CallCard({ order, nextId }: { order: CurrentOrder; nextId: string | null }) {
+function CallCard({ order, nextId, caller }: { order: CurrentOrder; nextId: string | null; caller: boolean }) {
   const { t, locale } = useI18n();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -197,18 +200,20 @@ function CallCard({ order, nextId }: { order: CurrentOrder; nextId: string | nul
             )}
             <FakeSignalTags fastFill={order.fastFill} sharedDevice={order.sharedDevice} fillSeconds={order.fillSeconds} labels={t.orders} />
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="mt-1 text-sm text-muted-foreground">
             {order.createdAt} · {t.confirm.attempts}: <span className="tabular-nums">{order.attempts}</span>
             {order.callbackAt && ` · ${t.confirm.due}: ${order.callbackAt}`}
           </p>
         </div>
-        <Link
-          href={`/orders/${order.id}`}
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ExternalLink className="size-4" />
-          {t.confirm.open}
-        </Link>
+        {!caller && (
+          <Link
+            href={`/orders/${order.id}`}
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <ExternalLink className="size-4" />
+            {t.confirm.open}
+          </Link>
+        )}
       </div>
 
       <div className="space-y-4 p-4">

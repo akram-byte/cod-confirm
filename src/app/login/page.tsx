@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Wordmark } from "@/components/brand-mark";
-import { isOwner } from "@/lib/auth";
+import { getRole } from "@/lib/auth";
 import { getDictionary } from "@/i18n/server";
 import { LoginForm } from "./login-form";
 import { LanguageToggle } from "@/components/language-toggle";
@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function LoginPage() {
-  if (await isOwner()) redirect("/");
+  if (await getRole()) redirect("/");
   const t = await getDictionary();
 
   return (
