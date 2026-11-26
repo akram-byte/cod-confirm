@@ -124,7 +124,7 @@ export async function createOrder(
   input: OrderInput,
   source: "FORM" | "MANUAL",
   opts: { feeOverride?: number; signals?: FormSignals } = {},
-): Promise<{ error: SaveError } | { id: string; number: number; total: number; duplicate: boolean }> {
+): Promise<{ error: SaveError } | { id: string; number: number; trackToken: string; total: number; duplicate: boolean }> {
   const [r, dup, signals] = await Promise.all([
     resolve(input, { feeOverride: opts.feeOverride }),
     findDuplicate(input.phone, input.productId),
@@ -169,7 +169,7 @@ export async function createOrder(
         ],
       },
     },
-    select: { id: true, number: true },
+    select: { id: true, number: true, trackToken: true },
   });
   // The customer (or the seller, from an abandoned form) made the order: no longer abandoned.
   await closeDrafts(db, input.phone, product.id, order.id, source).catch((e) => console.error("close drafts failed", e));

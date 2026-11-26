@@ -6,6 +6,8 @@ import { PageIntro } from "@/components/page-intro";
 import { db } from "@/lib/db";
 import { getRole } from "@/lib/auth";
 import { getQueue, whatsappUrl, type QueueItem } from "@/lib/confirmation";
+import { baseUrl } from "@/lib/base-url";
+import { trackPath } from "@/lib/tracking";
 import { formatDZD } from "@/lib/money";
 import { formatDateTime } from "@/lib/format";
 import { getCommune, getWilaya, wilayaLabel } from "@/lib/algeria";
@@ -109,6 +111,7 @@ export default async function ConfirmationPage({ searchParams }: PageProps<"/con
 
   const template = settings?.whatsappTemplate ?? "";
   const msgLocale: Locale = /[؀-ۿ]/.test(template) ? "ar" : "fr";
+  const base = await baseUrl();
 
   const current: CurrentOrder = {
     id: order.id,
@@ -143,6 +146,7 @@ export default async function ConfirmationPage({ searchParams }: PageProps<"/con
       // The message goes to the customer: use the template's language, not the dashboard's.
       total: formatDZD(order.total, msgLocale),
       wilaya: wilayaText(order.wilayaCode, msgLocale),
+      track: base + trackPath(order.trackToken),
     }),
   };
 

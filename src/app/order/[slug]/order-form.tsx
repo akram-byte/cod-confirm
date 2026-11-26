@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { CircleCheck, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { CircleCheck, Loader2, PackageSearch } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { trackPath } from "@/lib/tracking";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/field";
 import { LocationFields, feeFor, type Fees, type LocationValue } from "@/components/orders/location-fields";
@@ -92,6 +94,15 @@ export function PublicOrderForm({
         <CircleCheck className="mb-3 size-14 text-positive" />
         <h2 className="text-xl font-semibold">{t.publicOrder.successTitle}</h2>
         <p className="mt-2 text-muted-foreground">{fill(t.publicOrder.successText, { number: `#${result.number}` })}</p>
+        {result.track && (
+          <>
+            <Link href={trackPath(result.track)} className={buttonVariants({ className: "mt-6 h-11" })}>
+              <PackageSearch className="size-4" />
+              {t.publicOrder.track}
+            </Link>
+            <p className="mt-2 text-xs text-muted-foreground">{t.track.saveLink}</p>
+          </>
+        )}
         <Button
           variant="outline"
           className="mt-6 h-11"

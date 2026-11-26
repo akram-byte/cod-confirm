@@ -6,6 +6,8 @@ import { db } from "@/lib/db";
 import { getRole } from "@/lib/auth";
 import { getRescueQueue } from "@/lib/rescue";
 import { whatsappUrl } from "@/lib/confirmation";
+import { baseUrl } from "@/lib/base-url";
+import { trackPath } from "@/lib/tracking";
 import { risksFor } from "@/lib/customers";
 import { formatAgo } from "@/lib/format";
 import { formatDZD } from "@/lib/money";
@@ -36,6 +38,7 @@ export default async function RescuePage() {
   const msgLocale: Locale = /[؀-ۿ]/.test(settings?.whatsappTemplate ?? "") || !settings?.whatsappTemplate ? "ar" : "fr";
   const template = (msgLocale === "ar" ? ar : fr).rescue.whatsapp;
   const risks = await risksFor(orders.map((o) => o.customerId));
+  const base = await baseUrl();
 
   const rows: RescueRow[] = orders.map((o) => {
     const w = getWilaya(o.wilayaCode);
@@ -64,6 +67,7 @@ export default async function RescuePage() {
         product: products,
         total: formatDZD(o.total, msgLocale),
         wilaya: w ? wilayaLabel(w, msgLocale) : String(o.wilayaCode),
+        track: base + trackPath(o.trackToken),
       }),
     };
   });

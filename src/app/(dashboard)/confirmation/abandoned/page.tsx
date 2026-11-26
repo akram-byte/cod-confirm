@@ -51,6 +51,7 @@ export default async function AbandonedPage() {
         product,
         total: formatDZD(d.product.price * d.quantity, msgLocale),
         wilaya: w ? wilayaLabel(w, msgLocale) : "",
+        track: "", // no order yet
       }),
     };
   });

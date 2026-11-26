@@ -8,7 +8,7 @@ const ACCESS_ENDED_PATH = "/access-ended";
 // database, is requireOwner() in the dashboard layout and server actions.
 // The login page redirects signed-in owners itself (avoids a redirect loop
 // when an old cookie survives a password change).
-const PUBLIC_PATHS = ["/login", "/order", "/landing"];
+const PUBLIC_PATHS = ["/login", "/order", "/track", "/landing"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

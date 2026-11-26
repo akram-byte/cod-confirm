@@ -14,6 +14,8 @@ import { ar } from "@/i18n/ar";
 import { fr } from "@/i18n/fr";
 import type { Locale } from "@/i18n/config";
 import { whatsappUrl } from "@/lib/confirmation";
+import { baseUrl } from "@/lib/base-url";
+import { trackPath } from "@/lib/tracking";
 import { formatDZD } from "@/lib/money";
 import { DeliveryTable } from "./delivery-table";
 
@@ -56,6 +58,7 @@ export default async function DeliveryPage({ searchParams }: PageProps<"/deliver
   // Delivery-day reminder goes to the customer: same language as the seller's WhatsApp template.
   const msgLocale: Locale = /[؀-ۿ]/.test(settings?.whatsappTemplate ?? "") || !settings?.whatsappTemplate ? "ar" : "fr";
   const remindTemplate = (msgLocale === "ar" ? ar : fr).delivery.remindWhatsapp;
+  const base = await baseUrl();
   const countOf = (s: DeliveryTab) => counts.find((c) => c.status === s)?._count._all ?? 0;
   const risks = await risksFor(orders.map((o) => o.customerId));
 
@@ -89,6 +92,7 @@ export default async function DeliveryPage({ searchParams }: PageProps<"/deliver
               product: o.items.map((i) => i.productName).join("، "),
               total: formatDZD(o.total, msgLocale),
               wilaya: w ? wilayaLabel(w, msgLocale) : String(o.wilayaCode),
+              track: base + trackPath(o.trackToken),
             })
           : "",
     };

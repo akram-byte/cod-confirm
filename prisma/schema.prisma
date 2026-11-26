@@ -92,6 +92,8 @@ model Customer {
 model Order {
   id             String       @id @default(cuid())
   number         Int          @unique @default(autoincrement()) // shown to the seller (#1024)
+  // Private link for the customer's tracking page (/track/<token>): 32 random hex characters, never guessable.
+  trackToken     String       @unique @default(dbgenerated("replace((gen_random_uuid())::text, '-'::text, ''::text)"))
   customerId     String
   customer       Customer     @relation(fields: [customerId], references: [id])
   customerName   String

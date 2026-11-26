@@ -11,7 +11,7 @@ import { saveDraft } from "@/lib/drafts";
 import { z } from "zod";
 
 export type PublicOrderState =
-  | { ok: true; number: number; id: string; total: number }
+  | { ok: true; number: number; id: string; total: number; track: string }
   | { ok: false; errors?: FieldErrors; error?: "tooMany" | "unavailable" | "unknown" };
 
 // 5 orders per device (IP) every 15 minutes.
@@ -20,7 +20,7 @@ const WINDOW_MS = 15 * 60 * 1000;
 
 export async function submitPublicOrder(formData: FormData): Promise<PublicOrderState> {
   // Honeypot: real people never see this field. Bots fill it — pretend it worked.
-  if (String(formData.get("website") ?? "").trim() !== "") return { ok: true, number: 0, id: "", total: 0 };
+  if (String(formData.get("website") ?? "").trim() !== "") return { ok: true, number: 0, id: "", total: 0, track: "" };
 
   const parsed = orderInputSchema.safeParse({
     productId: formData.get("productId"),
@@ -55,7 +55,7 @@ export async function submitPublicOrder(formData: FormData): Promise<PublicOrder
     // Telegram alert after the reply is sent: the customer never waits for it.
     const base = await baseUrl();
     after(() => notifyNewOrder(result.id, base).catch((e) => console.error("telegram alert failed", e)));
-    return { ok: true, number: result.number, id: result.id, total: result.total };
+    return { ok: true, number: result.number, id: result.id, total: result.total, track: result.trackToken };
   } catch (e) {
     console.error("public order failed", e);
     return { ok: false, error: "unknown" };

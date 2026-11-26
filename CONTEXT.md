@@ -43,6 +43,8 @@ mostly through Facebook/Instagram ads. The store owner uses it themselves every 
 4. **Delivery**
    - Statuses: Shipped → Delivered / Returned. Optional tracking number.
    - Export confirmed orders to Excel/CSV for the delivery company.
+   - Customer tracking page: a private link per order (`/track/<token>`) showing the order's step. Shown after
+     ordering and sent in WhatsApp messages with `{track}`. No name, phone or address on it.
 5. **Stats**
    - Confirmation rate, delivery rate, return rate.
    - Profit = delivered sales − product cost − delivery fees − return costs − ad spend (ad spend entered manually by day).

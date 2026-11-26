@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useI18n } from "@/i18n/client";
 import { saveWhatsappTemplate } from "./whatsapp-actions";
 
-const VARS = ["name", "store", "order", "product", "total", "wilaya"] as const;
+const VARS = ["name", "store", "order", "product", "total", "wilaya", "track"] as const;
 
 export function WhatsappSection({ template, sample }: { template: string; sample: Record<(typeof VARS)[number], string> }) {
   const { t } = useI18n();

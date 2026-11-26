@@ -99,5 +99,11 @@ Tick boxes as work is finished. Each phase should end working and tested.
 - [x] Ad spend per product + cost per delivered order per product (Stats)
 - [ ] First real seller on a free trial (not code)
 
+## Order tracking (customer)
+- [x] Private tracking link per order (`/track/<token>`, random token; no name, phone or address on the page)
+- [x] Steps received → confirmed → on the way → delivered, with messages for no answer, call-back, failed delivery, cancelled, returned (Arabic + French)
+- [x] `{track}` in WhatsApp messages; the delivery-day reminder sends it
+- [ ] Check in the browser: "Track my order" button on the thank-you page, copy-link card on the order page (built and type-checked)
+
 ## Later (v2 ideas)
 - Messenger bot (Messenger Platform, needs Meta App Review), WhatsApp Business API, stock management.

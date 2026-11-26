@@ -59,6 +59,7 @@ export default async function SettingsPage() {
             product: products[0]?.name ?? "—",
             total: formatDZD(products[0] ? products[0].price + 400 : 0, locale),
             wilaya: locale === "ar" ? "16 - الجزائر" : "16 - Alger",
+            track: `${proto}://${host}/track/…`,
           }}
         />
         <TelegramSection enabled={telegramEnabled()} connected={!!settings?.telegramChatId} daily={settings?.telegramDaily ?? true} />

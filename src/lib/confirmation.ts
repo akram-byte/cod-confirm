@@ -87,7 +87,8 @@ export async function logCall(
   });
 }
 
-export const TEMPLATE_PLACEHOLDERS = ["name", "store", "order", "product", "total", "wilaya"] as const;
+// {track} is the full link to the customer's tracking page ("" where there is no order yet).
+export const TEMPLATE_PLACEHOLDERS = ["name", "store", "order", "product", "total", "wilaya", "track"] as const;
 
 /** wa.me link with the template filled in. */
 export function whatsappUrl(phone: string, template: string, values: Record<(typeof TEMPLATE_PLACEHOLDERS)[number], string>) {

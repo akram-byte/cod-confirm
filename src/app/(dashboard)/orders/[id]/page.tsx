@@ -15,6 +15,9 @@ import { getCommune, getWilaya, wilayaLabel } from "@/lib/algeria";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { fill } from "@/i18n/config";
 import { StatusSelect } from "./status-select";
+import { TrackLink } from "./track-link";
+import { baseUrl } from "@/lib/base-url";
+import { trackPath } from "@/lib/tracking";
 import { RiskBadge } from "@/components/risk-badge";
 import { risksFor } from "@/lib/customers";
 
@@ -36,6 +39,7 @@ export default async function OrderPage({ params }: PageProps<"/orders/[id]">) {
   ]);
   if (!order) notFound();
   const risk = (await risksFor([order.customerId])).get(order.customerId);
+  const trackUrl = (await baseUrl()) + trackPath(order.trackToken);
 
   const wilaya = getWilaya(order.wilayaCode);
   const commune = getCommune(order.wilayaCode, order.communeId);
@@ -160,6 +164,16 @@ export default async function OrderPage({ params }: PageProps<"/orders/[id]">) {
         </div>
 
         <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm text-muted-foreground">{d.trackPage}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <p className="text-xs text-muted-foreground">{d.trackPageHint}</p>
+              <TrackLink url={trackUrl} />
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle className="text-sm text-muted-foreground">{d.history}</CardTitle>
