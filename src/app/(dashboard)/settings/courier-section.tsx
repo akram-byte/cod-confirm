@@ -9,6 +9,9 @@ import { fill } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 import { checkCourierConnection, type CourierCheckState } from "./courier-actions";
 
+/** Keeps a French name ("16 Alger") in one piece inside an Arabic sentence. */
+const iso = (text: string) => `\u2068${text}\u2069`;
+
 /** Shown when COURIER is set: a read-only check of the keys and of every commune, before the first real parcel. */
 export function CourierSection({ label }: { label: string }) {
   const { t } = useI18n();
@@ -22,7 +25,7 @@ export function CourierSection({ label }: { label: string }) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Truck className="size-4" />
-          {fill(t.courierSettings.title, { courier: label })}
+          {fill(t.courierSettings.title, { courier: iso(label) })}
         </CardTitle>
         <CardDescription>{t.courierSettings.description}</CardDescription>
       </CardHeader>
@@ -57,13 +60,13 @@ export function CourierSection({ label }: { label: string }) {
               {good ? t.courierSettings.allGood : t.courierSettings.needsWork}
             </p>
             <ul className="space-y-1 text-muted-foreground">
-              <li>{fill(t.courierSettings.connected, { courier: r.courier, count: r.courierWilayas })}</li>
+              <li>{fill(t.courierSettings.connected, { courier: iso(r.courier), count: r.courierWilayas })}</li>
               <li>{fill(t.courierSettings.communes, { matched: r.matched, total: r.communes })}</li>
               {r.moved > 0 && <li>{fill(t.courierSettings.moved, { count: r.moved })}</li>}
               <li>
                 {r.homeDesks === null
-                  ? fill(t.courierSettings.homeMissing, { wilaya: r.homeWilaya })
-                  : fill(t.courierSettings.homeDesks, { wilaya: r.homeWilaya, count: r.homeDesks })}
+                  ? fill(t.courierSettings.homeMissing, { wilaya: iso(r.homeWilaya) })
+                  : fill(t.courierSettings.homeDesks, { wilaya: iso(r.homeWilaya), count: r.homeDesks })}
               </li>
             </ul>
             {r.missing.length > 0 && (

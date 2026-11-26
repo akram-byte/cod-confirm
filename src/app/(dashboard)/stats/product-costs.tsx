@@ -21,7 +21,44 @@ export function ProductCosts({ rows, generalAds, t, locale }: { rows: ProductRow
       ) : (
         <>
           {!anyAds && <p className="mb-3 rounded-md bg-muted px-3 py-2 text-sm">{p.noProductAds}</p>}
-          <div className="overflow-x-auto">
+          {/* Phone: one block per product, the two numbers to compare side by side. */}
+          <ul className="divide-y md:hidden">
+            {rows.map((r) => {
+              const losing = r.adsPerDelivered !== null && r.marginPerDelivered !== null && r.adsPerDelivered > r.marginPerDelivered;
+              return (
+                <li key={r.productId} className="py-3">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span dir="auto" className="min-w-0 truncate font-medium">
+                      {r.name}
+                    </span>
+                    <span className={cn("shrink-0 font-medium tabular-nums", r.profit < 0 && "text-negative")}>{money(r.profit)}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {fill(p.ordersLine, { orders: r.orders, returned: r.returned })} · {p.delivered}: <span className="tabular-nums">{r.delivered}</span>
+                    {r.ads > 0 && (
+                      <>
+                        {" "}
+                        · {p.ads}: <span className="tabular-nums">{money(r.ads)}</span>
+                      </>
+                    )}
+                  </p>
+                  <dl className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                    <div className="rounded-md bg-muted/60 px-2.5 py-1.5">
+                      <dt className="text-xs text-muted-foreground">{p.adsPerDelivered}</dt>
+                      <dd className={cn("tabular-nums", losing && "font-semibold text-negative")}>
+                        {r.ads > 0 && r.delivered === 0 ? p.noDelivered : money(r.adsPerDelivered)}
+                      </dd>
+                    </div>
+                    <div className="rounded-md bg-muted/60 px-2.5 py-1.5">
+                      <dt className="text-xs text-muted-foreground">{p.marginPerDelivered}</dt>
+                      <dd className="tabular-nums">{money(r.marginPerDelivered)}</dd>
+                    </div>
+                  </dl>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="hidden overflow-x-auto md:block">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -39,8 +76,10 @@ export function ProductCosts({ rows, generalAds, t, locale }: { rows: ProductRow
                   const losing = r.adsPerDelivered !== null && r.marginPerDelivered !== null && r.adsPerDelivered > r.marginPerDelivered;
                   return (
                     <TableRow key={r.productId}>
-                      <TableCell className="max-w-48 truncate font-medium">
-                        {r.name}
+                      <TableCell className="max-w-48 font-medium">
+                        <div dir="auto" className="truncate">
+                          {r.name}
+                        </div>
                         <div className="text-xs font-normal text-muted-foreground">
                           {fill(p.ordersLine, { orders: r.orders, returned: r.returned })}
                         </div>
